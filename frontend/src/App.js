@@ -4,12 +4,12 @@ import React from "react";
 
 import { Route, Routes} from "react-router-dom";
 
-import Navbar from "./components/navbar"
-import PostList from "./components/postList"
-import EditPost from "./components/postEdit"
-import CreatePost from "./components/postCreate"
-import Register from "./components/register"
-import Login from "./components/login"
+import Navbar from "./components/navbar.js"
+import PostList from "./components/postList.js"
+import EditPost from "./components/postEdit.js"
+import CreatePost from "./components/postCreate.js"
+import Register from "./components/register.js"
+import Login from "./components/login.js"
 
 function App() {
   return (
