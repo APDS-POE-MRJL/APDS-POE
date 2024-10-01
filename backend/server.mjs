@@ -1,29 +1,43 @@
-import https from "https";
-import fs from "fs";
-import users from "./routes/user.mjs";
 import express from "express";
-import cors from "cors";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+import fs from "fs";
+import https from "https";
+import users from "./routes/user.mjs"; // Your user routes
 
-const PORT = 3000;
+dotenv.config();
+
 const app = express();
+const PORT = process.env.PORT || 3000;
 
-const options = {
-    key: fs.readFileSync("keys/privatekey.pem"),
-    cert: fs.readFileSync("keys/certificate.pem")
-};
+// Database connection
+(async () => {
+    try {
+        await mongoose.connect(process.env.ATLAS_URI, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        });
+        console.log("Connected to MongoDB Atlas");
+    } catch (error) {
+        console.error("Failed to connect to MongoDB:", error);
+        process.exit(1);
+    }
+})();
 
-app.use(cors());
+// Middleware
 app.use(express.json());
-
-app.use((req, res, next) => {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Headers", "*");
-    res.setHeader("Access-Control-Allow-Methods", "*");
-    next();
-});
-
 app.use("/user", users);
 
-let server = https.createServer(options, app);
-console.log(`Server is running on port ${PORT}`);
-server.listen(PORT); // Corrected to use `server.listen()`
+// Read SSL certificate files
+const options = {
+    key: fs.readFileSync("keys/privatekey.pem"),
+    cert: fs.readFileSync("keys/certificate.pem"),
+};
+
+// Create HTTPS server
+const httpsServer = https.createServer(options, app);
+
+// Start the HTTPS server
+httpsServer.listen(PORT, () => {
+    console.log(`HTTPS Server is running on port ${PORT}`);
+});
