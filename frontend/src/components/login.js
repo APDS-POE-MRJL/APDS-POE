@@ -15,9 +15,9 @@ export default function Login() {
 
     async function onSubmit(e) {
         e.preventDefault();
-
-        const newPerson = {...form};
-
+    
+        const newPerson = { ...form };
+    
         const response = await fetch("http://localhost:3000/user/login", {
             method: "POST",
             headers: {
@@ -26,22 +26,32 @@ export default function Login() {
             body: JSON.stringify(newPerson),
         })
         .catch(error => {
-            window.alert(error);
+            window.alert("Login failed: " + error);
             return;
-        })
-
+        });
+    
+        if (!response.ok) {
+            window.alert("Invalid credentials, please try again!");
+            return;
+        }
+    
         const data = await response.json();
         const { token, name } = data;
-        console.log(name + " " + token)
-
-        //save the JWT to localstorage
+    
+        // Show success alert
+        window.alert(`Login successful! Welcome, ${name}`);
+    
+        // Save JWT and name to localStorage
         localStorage.setItem("JWT", token);
-        //save username as well, not really needed but we're going to keep it if we want to use it elsewhere
         localStorage.setItem("name", name);
-
-        setForm({name: "", password: ""});
-        navigate("/")
+    
+        // Clear the form
+        setForm({ name: "", password: "" });
+    
+        // Navigate to home
+        navigate("/");
     }
+    
     return(
         <div>
             <h1>Login</h1>

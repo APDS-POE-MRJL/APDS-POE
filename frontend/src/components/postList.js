@@ -30,7 +30,7 @@ export default function PostList() {
 
   useEffect(() => {
     async function getPosts() {
-      const response = await fetch('https://localhost:3000/post/');
+      const response = await fetch('http://localhost:3000/post/');
 
       if (!response.ok) {
         const message = `An error occurred: ${response.statusText}`;
@@ -47,7 +47,7 @@ export default function PostList() {
 
   async function deletePost(id) {
     const token = localStorage.getItem("jwt");
-    await fetch(`https://localhost:3000/post/${id}`, {  // Corrected template literals
+    await fetch(`http://localhost:3000/post/${id}`, {  // Corrected template literals
       method: "DELETE",
       headers: {
         "Authorization": `Bearer ${token}`,  // Corrected template literals

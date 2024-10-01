@@ -13,7 +13,6 @@ export default function Navbar() {
         <div className="navbar" id="navbarSupportedContent">
           <ul className="navbar-nav ml-auto">
             <NavLink className="nav-Link" to="/">List</NavLink>
-            <NavLink className="nav-Link" to="/create">Create Post</NavLink>
             <NavLink className="nav-Link" to="/register">Register</NavLink>
             <NavLink className="nav-Link" to="/login">Login</NavLink>
           </ul>
