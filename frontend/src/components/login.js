@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import {userNavigate} from "react-router";
+import { useNavigate } from "react-router-dom"; // Corrected to 'react-router-dom'
 export default function Login() {
     const [form, setForm] = useState({
         name: "",
@@ -40,7 +40,7 @@ export default function Login() {
         localStorage.setItem("name", name);
 
         setForm({name: "", password: ""});
-        naviagte("/")
+        navigate("/")
     }
     return(
         <div>

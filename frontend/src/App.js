@@ -1,8 +1,6 @@
-import logo from './logo.svg';
 import './App.css';
 import React from "react";
-
-import { Route, Routes} from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 
 import Navbar from "./components/navbar.js"
 import PostList from "./components/postList.js"
@@ -27,15 +25,3 @@ function App() {
 }
 
 export default App;
-
-/* 
-old, initial code for project
-<header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Welcome to the initial build
-        </p>
-        <a>
-          We're going to build the frontend here
-        </a>
-      </header> */
