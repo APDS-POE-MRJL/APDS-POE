@@ -9,9 +9,9 @@ import CreatePost from "./components/postCreate.js"
 import Register from "./components/register.js"
 import Login from "./components/login.js"
 
-function App() {
+const App = () => {
   return (
-    <div className="Navbar">
+    <div>
       <Navbar />
       <Routes>
         <Route exact path="/" element={<PostList />} />
