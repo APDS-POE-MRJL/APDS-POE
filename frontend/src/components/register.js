@@ -19,41 +19,6 @@ export default function Register() {
   async function onSubmit(e) {
     e.preventDefault();
 
-<<<<<<< Updated upstream
-    // This function will handle the submission.
-    async function onSubmit(e) {
-        e.preventDefault();
-    
-        const newPerson = { ...form };
-    
-        try {
-            const response = await fetch("https://localhost:3000/user/signup/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(newPerson),
-            });
-    
-            if (!response.ok) {
-                const errorMessage = await response.text();
-                window.alert(`Signup failed: ${errorMessage}`);
-                return;
-            }
-    
-            window.alert("Signup successful!");
-    
-            // Clear form and navigate if successful
-            setForm({ name: "", password: "" });
-            navigate("/");
-        } catch (error) {
-            window.alert(`Error: ${error.message}`);
-        }
-    }
-    
-
-    return (
-=======
     const newPerson = { ...form };
 
     await fetch("http://localhost:3000/user/signup", {
@@ -75,7 +40,6 @@ export default function Register() {
     <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
       <div className="card p-4 shadow" style={{ width: "300px" }}>
         <h2 className="text-center mb-4">Register</h2>
->>>>>>> Stashed changes
         <form onSubmit={onSubmit}>
           <div className="form-group mb-3">
             <label htmlFor="name">Name</label>
