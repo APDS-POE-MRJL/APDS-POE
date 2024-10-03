@@ -47,13 +47,8 @@ export default function PostList() {
   }, [posts.length]); // Fixed dependency array
   
   async function deletePost(id) {
-<<<<<<< Updated upstream
-    const token = localStorage.getItem("jwt");
-    await fetch(`https://localhost:3000/post/${id}`, {  // Corrected template literals
-=======
     const token = localStorage.getItem("JWT");
     await fetch(`http://localhost:3000/posts/${id}`, {
->>>>>>> Stashed changes
       method: "DELETE",
       headers: {
         "Authorization": `Bearer ${token}`,
