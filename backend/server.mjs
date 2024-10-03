@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import fs from "fs";
 import https from "https";
 import users from "./routes/user.mjs"; // Your user routes
+import cors from 'cors';  // Import CORS
 
 dotenv.config();
 
@@ -27,6 +28,8 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(express.json());
 app.use("/user", users);
+app.use(cors({ origin: 'http://localhost:3001' }));  // Allow requests from your React frontend
+app.use(cors({ origin: 'https://localhost:3001' }));  // Allow requests from your React frontend
 
 // Read SSL certificate files
 const options = {

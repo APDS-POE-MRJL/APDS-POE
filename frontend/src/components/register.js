@@ -20,26 +20,34 @@ export default function Register() {
     // This function will handle the submission.
     async function onSubmit(e) {
         e.preventDefault();
-
-        const newPerson = { ...form }; // Use spread operator to get form data
-
-        // Fetch call to send data to the server
-        await fetch("http://localhost:3000/user/signup", { // Fixed fetch syntax
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(newPerson),
-        })
-        .catch(error => {
-            window.alert(error); // Alert if there's an error
-            return;
-        });
-
-        // Clear the form and navigate after successful signup
-        setForm({ name: "", password: "" });
-        navigate("/"); // Navigate to home or another route
+    
+        const newPerson = { ...form };
+    
+        try {
+            const response = await fetch("https://localhost:3000/user/signup/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(newPerson),
+            });
+    
+            if (!response.ok) {
+                const errorMessage = await response.text();
+                window.alert(`Signup failed: ${errorMessage}`);
+                return;
+            }
+    
+            window.alert("Signup successful!");
+    
+            // Clear form and navigate if successful
+            setForm({ name: "", password: "" });
+            navigate("/");
+        } catch (error) {
+            window.alert(`Error: ${error.message}`);
+        }
     }
+    
 
     return (
         <form onSubmit={onSubmit}>
