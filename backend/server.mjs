@@ -11,6 +11,20 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+
+// CORS Middleware - Moved before routes
+app.use(cors({
+    origin: ['http://localhost:3001', 'https://localhost:3001'],
+    credentials: true,
+    optionsSuccessStatus: 200
+}));
+
+// Middleware
+app.use(express.json());
+
+// User Routes
+app.use("/user", users);
+
 // Database connection
 (async () => {
     try {
@@ -24,12 +38,6 @@ const PORT = process.env.PORT || 3000;
         process.exit(1);
     }
 })();
-
-// Middleware
-app.use(express.json());
-app.use("/user", users);
-app.use(cors({ origin: 'http://localhost:3001' }));  // Allow requests from your React frontend
-app.use(cors({ origin: 'https://localhost:3001' }));  // Allow requests from your React frontend
 
 // Read SSL certificate files
 const options = {

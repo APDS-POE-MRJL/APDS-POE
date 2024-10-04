@@ -21,14 +21,15 @@ export default function Register() {
 
     const newPerson = { ...form };
 
-    await fetch("http://localhost:3000/user/signup", {
+    // Use the environment variable for the backend URL
+    await fetch(`${process.env.REACT_APP_API_URL}/user/signup`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+          "Content-Type": "application/json",
       },
       body: JSON.stringify(newPerson),
     }).catch(error => {
-      window.alert(error);
+      window.alert("Registration failed: " + error);
       return;
     });
 

@@ -31,7 +31,8 @@ export default function PostList() {
 
   useEffect(() => {
     async function getPosts() {
-      const response = await fetch("http://localhost:3000/posts/");
+      // Use the environment variable for the API URL
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/posts/`);
     
       if (!response.ok) {
         const message = `An error has occurred: ${response.status}`;
@@ -48,7 +49,7 @@ export default function PostList() {
   
   async function deletePost(id) {
     const token = localStorage.getItem("JWT");
-    await fetch(`http://localhost:3000/posts/${id}`, {
+    await fetch(`${process.env.REACT_APP_API_URL}/posts/${id}`, {
       method: "DELETE",
       headers: {
         "Authorization": `Bearer ${token}`,
@@ -72,7 +73,6 @@ export default function PostList() {
   }
   
   return (
-    <body>
     <div className="container mt-4">
       <h2 className="text-center mb-4">APDS Notice Board</h2>
       <table className="table table-hover">
@@ -87,6 +87,5 @@ export default function PostList() {
         <tbody>{postList()}</tbody>
       </table>
     </div>
-    </body>
   );
 }

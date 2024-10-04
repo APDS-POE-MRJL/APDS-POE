@@ -20,10 +20,11 @@ export default function Login() {
 
     const newPerson = { ...form };
 
-    const response = await fetch("http://localhost:3000/user/login", {
+    // Use the environment variable for the backend URL
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/user/login`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+          "Content-Type": "application/json",
       },
       body: JSON.stringify(newPerson),
     }).catch(error => {
