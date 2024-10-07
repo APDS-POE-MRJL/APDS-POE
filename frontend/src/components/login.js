@@ -47,6 +47,7 @@ export default function Login() {
 
     setForm({ name: "", password: "" });
     navigate("/");
+    window.location.reload();
   }
 
   return (
