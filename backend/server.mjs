@@ -4,13 +4,13 @@ import dotenv from "dotenv";
 import fs from "fs";
 import https from "https";
 import users from "./routes/user.mjs"; // Your user routes
+import requests from "./routes/request.mjs"; // Your requests routes
 import cors from 'cors';  // Import CORS
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
 
 // CORS Middleware - Moved before routes
 app.use(cors({
@@ -24,6 +24,9 @@ app.use(express.json());
 
 // User Routes
 app.use("/user", users);
+
+// Requests Routes
+app.use("/requests", requests);
 
 // Database connection
 (async () => {
