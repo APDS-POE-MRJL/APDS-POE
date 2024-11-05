@@ -11,7 +11,7 @@ var store = new ExpressBrute.MemoryStore();
 var bruteforce = new ExpressBrute(store);
 
 
-//This page is for all users, normal users will be able to 
+//This page will be for both admins and users, users can see their pending requests and admins can see all pending requests
 router.get("/list", async (req, res) => {
     try {
         // Assuming the token is passed in the Authorization header as a Bearer token
@@ -40,6 +40,35 @@ router.get("/list", async (req, res) => {
     }
 });
 
+//This page is for both users, users can see all requests and admins can see all requests (like an audit log)
+router.get("/auditlist", async (req, res) => {
+    try {
+        // Assuming the token is passed in the Authorization header as a Bearer token
+        const token = req.headers.authorization.split(" ")[1];
+        let decodedToken;
+        try {
+            decodedToken = jwt.verify(token, "secret_key");
+        } catch (error) {
+            return res.status(401).json({ message: "Invalid token" });
+        }
+        const role = decodedToken.role;
+
+        if (role === "user") {
+            query.sender = accountNumber;
+        }
+
+        let query = { status: { $in: ["Pending", "Approved", "Rejected"] } };
+
+        let collection = await requestsDb.collection("requests");
+        let results = await collection.find(query).toArray();
+
+        res.status(200).json(results);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Request failed" });
+    }
+});
+
 //This page is for end users to create a request, this can be accessed by all
 router.post("/create", async (req, res) => {
     try {
@@ -52,7 +81,7 @@ router.post("/create", async (req, res) => {
             return res.status(401).json({ message: "Invalid token" });
         }
         const accountNumber = decodedToken.accountNumber;
-        const { amount, currency, recipiant } = req.body;
+        const { amount, currency, recipiant, code } = req.body;
 
         if (amount < 0 || amount > 1000000 || !/^\d+$/.test(amount) || amount == null) {
             return res.status(400).json({ message: "Amount is invalid" });
@@ -67,10 +96,15 @@ router.post("/create", async (req, res) => {
             return res.status(400).json({ message: "Recipiant is invalid" });
         }
 
+        if (code == null || code.length !== 8 || !/^\d+$/.test(code)) {
+            return res.status(400).json({ message: "SWIFT Code is invalid" });
+        }
+
         let newDocument = {
             amount: req.body.amount,
             currency: req.body.currency,
             provider: "SWIFT",
+            code: req.body.swiftCode, //This value is not actually checked because the service requires a genuine account, this is all for show https://www.swift.com/myswift
             sender: accountNumber, // Include the accountNumber here
             recipiant: req.body.recipiant,
             status: "Pending"

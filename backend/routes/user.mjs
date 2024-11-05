@@ -1,5 +1,5 @@
 import express from "express";
-import { usersDb } from "../db/conn.mjs";
+import { usersDb, requestsDb } from "../db/conn.mjs";
 import { ObjectId } from "mongodb";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -87,6 +87,75 @@ router.post("/login", bruteforce.prevent, async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Authentication failed in general" });
+    }
+});
+
+router.get("/locate", async (req, res) => {
+    const { accountNumber } = req.query;
+
+    if (!accountNumber) {
+        return res.status(400).json({ message: "Account number is required" });
+    }
+
+    // Check for JWT token and role
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) {
+        return res.status(401).json({ message: "Authorization token is required" });
+    }
+
+    let decodedToken;
+    try {
+        decodedToken = jwt.verify(token, "secret_key");
+    } catch (error) {
+        return res.status(401).json({ message: "Invalid token" });
+    }
+
+    const role = decodedToken.role;
+    if (role !== "admin") {
+        return res.status(404).json({ message: "Not authorized" });
+    }
+
+    try {
+        const requestsCollection = await requestsDb.collection("requests");
+        const request = await requestsCollection.findOne({
+            $or: [{ sender: accountNumber }, { recipiant: accountNumber }]
+        });
+
+        if (!request) {
+            return res.status(404).json({ message: "No request found with the provided account number" });
+        }
+
+        const usersCollection = await usersDb.collection("users");
+        const users = await usersCollection.find().toArray();
+
+        let user = null;
+        for (const u of users) {
+            const accountMatch = await bcrypt.compare(accountNumber, u.accountNumber);
+            if (accountMatch) {
+                user = u;
+                break;
+            }
+        }
+
+        if (!user) {
+            return res.status(404).json({ message: "No user found with the provided account number" });
+        }
+
+        // Decrypt user details (assuming bcrypt was used for hashing)
+        const decryptedUser = {
+            _id: user._id,
+            name: user.name,
+            userName: user.userName,
+            idNumber: user.idNumber,
+            accountNumber: user.accountNumber,
+            password: user.password,
+            role: user.role
+        };
+
+        res.status(200).json(decryptedUser);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Failed to locate user" });
     }
 });
 
