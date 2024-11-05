@@ -1,38 +1,32 @@
-name: SonarQube Scan
+name: CI
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 
 jobs:
-  sonarqube:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'           # Update to Java 17
-          distribution: 'temurin'      # Specify the OpenJDK distribution
-          java-package: jdk            # Specify the type of package to install
-          check-latest: false
-          server-id: github
-          server-username: GITHUB_ACTOR
-          server-password: ${{ secrets.GITHUB_TOKEN }}
-          overwrite-settings: true
+    - name: Build
+      run: |
+        # Your build commands here
+        ./gradlew build
 
-      - name: Run SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@7295e71c9583053f5bf40e9d4068a0c974603ec8
-        with:
-          args: >
-            -Dsonar.projectKey=apds-poe-mrjl
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: https://sonarcloud.io
+    - name: Run Tests
+      run: |
+        # Your test commands here
+        ./gradlew test
+
+    - name: Run SonarScanner
+      uses: SonarSource/sonarqube-scan-action@7295e71c9583053f5bf40e9d4068a0c974603ec8
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      with:
+        args: '-Dsonar.projectKey=apds-poe-mrjl'
