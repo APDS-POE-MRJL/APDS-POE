@@ -19,9 +19,9 @@ jobs:
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
-          java-version: '11'
-          distribution: 'temurin'  # Added distribution here
-          java-package: jdk
+          java-version: '17'           # Update to Java 17
+          distribution: 'temurin'      # Specify the OpenJDK distribution
+          java-package: jdk            # Specify the type of package to install
           check-latest: false
           server-id: github
           server-username: GITHUB_ACTOR
