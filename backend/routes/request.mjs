@@ -27,7 +27,7 @@ router.get("/list", async (req, res) => {
 
         let query = { status: "Pending" };
         if (role === "user") {
-            query.accountNumber = accountNumber;
+            query.sender = accountNumber;
         }
 
         let collection = await requestsDb.collection("requests");
@@ -132,15 +132,86 @@ router.get("/details", async (req, res) => {
 
 //
 router.post("/approve", async (req, res) => {
+    try {
+        // Assuming the token is passed in the Authorization header as a Bearer token
+        const token = req.headers.authorization.split(" ")[1];
+        let decodedToken;
+        try {
+            decodedToken = jwt.verify(token, "secret_key");
+        } catch (error) {
+            return res.status(401).json({ message: "Invalid token" });
+        }
 
+        const role = decodedToken.role;
 
+        // Check if the role is "admin"
+        if (role !== "admin") {
+            return res.status(404).json({ message: "Not authorized" });
+        }
 
+        const { _id } = req.body;
+
+        if (!_id) {
+            return res.status(400).json({ message: "ID is required" });
+        }
+
+        const collection = await requestsDb.collection("requests");
+        const result = await collection.updateOne(
+            { _id: new ObjectId(_id), status: "Pending" },
+            { $set: { status: "Approved" } }
+        );
+
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ message: "Request not found or already approved" });
+        }
+
+        res.status(200).json({ message: "Request approved successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Request approval failed" });
+    }
 });
 
 //Commaand if the created request is rejected
 router.post("/reject", async (req, res) => {
+    try {
+        // Assuming the token is passed in the Authorization header as a Bearer token
+        const token = req.headers.authorization.split(" ")[1];
+        let decodedToken;
+        try {
+            decodedToken = jwt.verify(token, "secret_key");
+        } catch (error) {
+            return res.status(401).json({ message: "Invalid token" });
+        }
 
+        const role = decodedToken.role;
 
+        // Check if the role is "admin"
+        if (role !== "admin") {
+            return res.status(404).json({ message: "Not authorized" });
+        }
+
+        const { _id } = req.body;
+
+        if (!_id) {
+            return res.status(400).json({ message: "ID is required" });
+        }
+
+        const collection = await requestsDb.collection("requests");
+        const result = await collection.updateOne(
+            { _id: new ObjectId(_id), status: "Pending" },
+            { $set: { status: "Rejected" } }
+        );
+
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ message: "Request not found or already rejected" });
+        }
+
+        res.status(200).json({ message: "Request rejected successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Request rejection failed" });
+    }
 });
 
 export default router;
