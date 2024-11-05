@@ -3,7 +3,8 @@
     "bootstrap": "^5.3.3",
     "cors": "^2.8.5",
     "express-brute": "^1.0.1",
-    "react-router-dom": "^6.26.2"
+    "react-router-dom": "^6.26.2",
+    "uuid": "^11.0.2"
   },
   "devDependencies": {
     "@types/node": "^22.7.4"

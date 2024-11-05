@@ -1,32 +1,36 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; 
-import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap styles
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom"; // Import useLocation
+import "bootstrap/dist/css/bootstrap.min.css";
 
 export default function Login() {
   const [form, setForm] = useState({
-    name: "",
-    password: ""
+    userName: "",
+    password: "",
+    accountNumber: ""
   });
+
   const navigate = useNavigate();
+  const location = useLocation(); // Get the location object
+
+  // Use useEffect to check if there is state passed from the Register component
+  useEffect(() => {
+    if (location.state) {
+      const { userName, accountNumber } = location.state;
+      window.alert(`Registration Successful!\nYour username: ${userName}\nYour account number: ${accountNumber}`);
+    }
+  }, [location.state]); // Only run when the location state changes
 
   function updateForm(value) {
-    return setForm(prev => {
-      return { ...prev, ...value };
-    });
+    setForm(prev => ({ ...prev, ...value }));
   }
 
   async function onSubmit(e) {
     e.preventDefault();
 
-    const newPerson = { ...form };
-
-    // Use the environment variable for the backend URL
     const response = await fetch(`${process.env.REACT_APP_API_URL}/user/login`, {
       method: "POST",
-      headers: {
-          "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newPerson),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
     }).catch(error => {
       window.alert("Login failed: " + error);
       return;
@@ -38,14 +42,14 @@ export default function Login() {
     }
 
     const data = await response.json();
-    const { token, name } = data;
+    const { token, accountNumber } = data;
 
-    window.alert(`Login successful! Welcome, ${name}`);
+    window.alert("Authentication successful!");
 
     localStorage.setItem("JWT", token);
-    localStorage.setItem("name", name);
+    localStorage.setItem("accountNumber", accountNumber);
 
-    setForm({ name: "", password: "" });
+    setForm({ userName: "", password: "", accountNumber: "" });
     navigate("/");
     window.location.reload();
   }
@@ -56,14 +60,14 @@ export default function Login() {
         <h2 className="text-center mb-4">Login</h2>
         <form onSubmit={onSubmit}>
           <div className="form-group mb-3">
-            <label htmlFor="name">Name</label>
+            <label htmlFor="userName">Username</label>
             <input
               type="text"
               className="form-control"
-              id="name"
-              value={form.name}
-              onChange={(e) => updateForm({ name: e.target.value })}
-              placeholder="Enter your name"
+              id="userName"
+              value={form.userName}
+              onChange={(e) => updateForm({ userName: e.target.value })}
+              placeholder="Enter your username"
             />
           </div>
           <div className="form-group mb-3">
@@ -77,8 +81,21 @@ export default function Login() {
               placeholder="Enter your password"
             />
           </div>
+          <div className="form-group mb-3">
+            <label htmlFor="accountNumber">Account Number</label>
+            <input
+              type="text"
+              className="form-control"
+              id="accountNumber"
+              value={form.accountNumber}
+              onChange={(e) => updateForm({ accountNumber: e.target.value })}
+              placeholder="Enter your account number"
+            />
+          </div>
           <div className="d-grid">
-            <button type="submit" className="btn btn-primary">Login</button>
+            <button type="submit" className="btn btn-primary">
+              Login
+            </button>
           </div>
         </form>
       </div>

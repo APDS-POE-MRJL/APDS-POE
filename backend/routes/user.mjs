@@ -1,12 +1,11 @@
 import express from "express";
-import  {usersDb} from "../db/conn.mjs";
+import { usersDb } from "../db/conn.mjs";
 import { ObjectId } from "mongodb";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import ExpressBrute from "express-brute";
 
 const router = express.Router();
-
 var store = new ExpressBrute.MemoryStore();
 var bruteforce = new ExpressBrute(store);
 
@@ -24,44 +23,45 @@ router.post("/signup", async (req, res) => {
             return res.status(400).json({ message: "Id number is invalid" });
         }
 
+        // Generate a unique account number
+        const accountNumber = Math.floor(1000000000 + Math.random() * 9000000000).toString();
+
+        // Create a username based on the user's name
+        const [firstName, lastName] = req.body.name.trim().split(/\s+/);
+        const userName = `${firstName.slice(0, 4)}${lastName.slice(0, 3)}${accountNumber.slice(-4)}`;
+
+        //  This document is shown to the user before hashing the password
+        let successDocument = {
+            userName: userName,
+            accountNumber: accountNumber,
+        };
+
         // Hash the password with 10 salt rounds
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
         const hashedId = await bcrypt.hash(req.body.idNumber, 10);
-        const accountNumber = Math.floor(1000000000 + Math.random() * 9000000000).toString();
-        const hashedNumber = await bcrypt.hash(accountNumber, 10);
+        const hashedAccountNumber = await bcrypt.hash(accountNumber, 10);
         
-        // Create a username
-        const [firstName, lastName] = req.body.name.trim().split(/\s+/);
-        const username = `${firstName.slice(0, 4)}${lastName.slice(0, 3)}${accountNumber.slice(-4)}`;
-
-        //  This document is sent to mongoDB
+        //  This document is sent to MongoDB
         let newDocument = {
             name: req.body.name,
-            userName: username,
+            userName: userName,
             idNumber: hashedId,
-            accountNumber: hashedNumber,
+            accountNumber: hashedAccountNumber,
             password: hashedPassword,
             role: "user"
         };
-        
+
         // Insert the new user into the "users" collection
         let collection = await usersDb.collection("users");
         let result = await collection.insertOne(newDocument);
 
-        //  This document it shown to the user
-        let successDocument = {
-            userName: username,
-            accountNumber: accountNumber,
-        }
-        
-        // Send a 201 response indicating successful user creation showing their new credentials
+        // Send a 201 response indicating successful user creation
         res.status(201).json(successDocument);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Signup failed" });
     }
 });
-
 
 // Login route
 router.post("/login", bruteforce.prevent, async (req, res) => {
@@ -77,7 +77,6 @@ router.post("/login", bruteforce.prevent, async (req, res) => {
         const passwordMatch = await bcrypt.compare(password, user.password);
         const accountMatch = await bcrypt.compare(accountNumber, user.accountNumber);
 
-        // Updated to contain the new requirements
         if (passwordMatch && accountMatch) {
             // Successful login
             const token = jwt.sign({ accountNumber: accountNumber, role: user.role }, "secret_key", { expiresIn: "1h" });
@@ -85,14 +84,13 @@ router.post("/login", bruteforce.prevent, async (req, res) => {
         } else {
             return res.status(401).json({ message: "Authentication failed with invalid details" });
         }
-
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Authentication failed in general" });
     }
 });
 
-// Admin Sign up route, to be removed once created
+// Admin Sign up route
 router.post("/adminsignup", async (req, res) => {
     try {
         // Ensure all fields are present
@@ -106,37 +104,39 @@ router.post("/adminsignup", async (req, res) => {
             return res.status(400).json({ message: "Id number is invalid" });
         }
 
+        // Generate a unique account number
+        const accountNumber = Math.floor(1000000000 + Math.random() * 9000000000).toString();
+
+        // Create a username based on the user's name
+        const [firstName, lastName] = req.body.name.trim().split(/\s+/);
+        const userName = `${firstName.slice(0, 4)}${lastName.slice(0, 3)}${accountNumber.slice(-4)}`;
+
+        //  This document is shown to the user before hashing the password
+        let successDocument = {
+            userName: userName,
+            accountNumber: accountNumber,
+        };
+
         // Hash the password with 10 salt rounds
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
         const hashedId = await bcrypt.hash(req.body.idNumber, 10);
-        const accountNumber = Math.floor(1000000000 + Math.random() * 9000000000).toString();
-        const hashedNumber = await bcrypt.hash(accountNumber, 10);
+        const hashedAccountNumber = await bcrypt.hash(accountNumber, 10);
         
-        // Create a username
-        const [firstName, lastName] = req.body.name.trim().split(/\s+/);
-        const username = `${firstName.slice(0, 4)}${lastName.slice(0, 3)}${accountNumber.slice(-4)}`;
-
-        //  This document is sent to mongoDB
+        //  This document is sent to MongoDB
         let newDocument = {
             name: req.body.name,
-            userName: username,
+            userName: userName,
             idNumber: hashedId,
-            accountNumber: hashedNumber,
+            accountNumber: hashedAccountNumber,
             password: hashedPassword,
             role: "admin"
         };
-        
+
         // Insert the new user into the "users" collection
         let collection = await usersDb.collection("users");
         let result = await collection.insertOne(newDocument);
 
-        //  This document it shown to the user
-        let successDocument = {
-            userName: username,
-            accountNumber: accountNumber,
-        }
-        
-        // Send a 201 response indicating successful user creation showing their new credentials
+        // Send a 201 response indicating successful user creation
         res.status(201).json(successDocument);
     } catch (error) {
         console.error(error);
