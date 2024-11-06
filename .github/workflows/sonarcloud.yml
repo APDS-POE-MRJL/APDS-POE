@@ -19,20 +19,15 @@ jobs:
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
-          java-version: '17'           # Update to Java 17
-          distribution: 'temurin'      # Specify the OpenJDK distribution
-          java-package: jdk            # Specify the type of package to install
-          check-latest: false
-          server-id: github
-          server-username: GITHUB_ACTOR
-          server-password: ${{ secrets.GITHUB_TOKEN }}
-          overwrite-settings: true
+          java-version: '17'
+          distribution: 'temurin'
 
       - name: Run SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@7295e71c9583053f5bf40e9d4068a0c974603ec8
         with:
           args: >
             -Dsonar.projectKey=apds-poe-mrjl
+            -Dsonar.organization=apds-poe-mrjl
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
