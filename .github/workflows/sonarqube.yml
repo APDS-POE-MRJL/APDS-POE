@@ -45,7 +45,7 @@ jobs:
 
     # Optional: Upload build artifacts or reports if needed
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3  # Updated to the latest version
       with:
         name: build-artifacts
         path: target/*  # Adjust if you're using Maven or Gradle to store the build outputs
