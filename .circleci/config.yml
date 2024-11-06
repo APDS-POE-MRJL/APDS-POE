@@ -1,20 +1,48 @@
 version: 2.1
 
+# Define jobs
 jobs:
+  # Build job
   build:
     docker:
-      - image: openjdk:17-jdk-slim  # Updated image
+      # Use CircleCI's openjdk image that comes with Maven pre-installed
+      - image: circleci/openjdk:17.0.1-jdk-buster
+    steps:
+      - checkout  # Checkout the code from GitHub repository
+      - run:
+          name: Install dependencies
+          command: |
+            # This is just an example if you want to install additional dependencies
+            # apt-get update && apt-get install -y <other_dependencies>
+            echo "Dependencies installed"
+      - run:
+          name: Build with Maven
+          command: mvn clean install  # This will run the Maven build command
+      - run:
+          name: Run SonarQube Scan
+          command: |
+            sonar-scanner \
+              -Dsonar.projectKey=apds-poe-mrjl \
+              -Dsonar.organization=apds-poe-mrjl \
+              -Dsonar.sources=src  # This will run the SonarQube scan after building
+
+  # Optionally, add a job to deploy or perform further actions after successful build
+  deploy:
+    docker:
+      - image: circleci/openjdk:17.0.1-jdk-buster
     steps:
       - checkout
       - run:
-          name: Build with Maven
-          command: mvn clean install
-      - run:
-          name: Run SonarQube Scan
-          command: sonar-scanner -Dsonar.projectKey=apds-poe-mrjl -Dsonar.organization=apds-poe-mrjl -Dsonar.sources=src
+          name: Deploy to production (example)
+          command: echo "Deploying application"  # This is just a placeholder
 
+# Define workflows
 workflows:
   version: 2
   build_and_scan:
     jobs:
-      - build
+      - build  # Run the build and SonarQube scan job
+      # Uncomment the following line if you need to deploy after build
+      # - deploy:
+      #     requires:
+      #       - build  # Only deploy if the build job succeeds
