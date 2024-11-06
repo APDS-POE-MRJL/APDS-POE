@@ -3,37 +3,36 @@ name: Build and SonarQube Analysis
 on:
   push:
     branches:
-      - main  # Trigger on push to main branch, adjust as needed
+      - main
   pull_request:
     branches:
-      - main  # Trigger on pull requests targeting the main branch
+      - main
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # You can change this based on your environment (e.g., windows-latest)
+    runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the code from the repository
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Set up JDK 17 (for both building and SonarQube)
+      # Set up Java 17
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
-          distribution: 'temurin'  # You can use 'openjdk' or 'temurin'
+          distribution: 'temurin'
 
-      # Step 3: Build your project (for example, using Maven or Gradle)
-      - name: Build with Maven
-        run: |
-          mvn clean install # Replace with your specific build command (e.g., for Maven or Gradle)
+      # Build your project using Gradle
+      - name: Build with Gradle
+        run: ./gradlew build  # Adjust if you're using a different Gradle command
+        working-directory: ./APDS-POE  # If your Gradle files are in a subdirectory
 
-      # Step 4: Run SonarQube analysis
+      # Run SonarQube analysis
       - name: Run SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v3
         with:
           args: -Dsonar.projectKey=apds-poe-mrjl -Dsonar.organization=apds-poe-mrjl
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  # Ensure you have a SONAR_TOKEN stored in GitHub secrets
-          SONAR_HOST_URL: https://sonarcloud.io  # If you use SonarCloud; for self-hosted use your server URL
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
