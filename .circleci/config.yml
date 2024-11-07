@@ -31,23 +31,27 @@ jobs:
           name: Install dependencies
           command: npm install
 
-      # Install sonar-scanner globally
+      # Install sonar-scanner locally
       - run:
-          name: Install sonar-scanner globally
-          command: npm install -g sonar-scanner
+          name: Install sonar-scanner locally
+          command: npm install sonar-scanner
 
-      # Run SonarQube scan
+      # Ensure execute permissions for sonar-scanner
+      - run:
+          name: Grant execute permissions to sonar-scanner
+          command: chmod +x ./node_modules/sonar-scanner/bin/sonar-scanner
+
+      # Run SonarQube scan using npx
       - run:
           name: Run SonarQube scan
           command: |
-            sonar-scanner \
+            npx sonar-scanner \
               -Dsonar.projectKey=$SONAR_PROJECT_KEY \
               -Dsonar.organization=$SONAR_ORGANIZATION \
               -Dsonar.sources=./src \
               -Dsonar.host.url=$SONAR_HOST_URL \
               -Dsonar.login=$SONAR_TOKEN2
 
-# Define the workflow to run the build and scan job
 workflows:
   version: 2
   build_and_scan_workflow:
