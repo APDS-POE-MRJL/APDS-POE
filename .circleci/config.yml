@@ -1,48 +1,42 @@
+# .circleci/config.yml
+
 version: 2.1
 
-# Define jobs
-jobs:
-  # Build job
-  build:
+executors:
+  node-executor:
     docker:
-      # Use CircleCI's openjdk image that comes with Maven pre-installed
-      - image: circleci/openjdk:17.0.1-jdk-buster
-    steps:
-      - checkout  # Checkout the code from GitHub repository
-      - run:
-          name: Install dependencies
-          command: |
-            # This is just an example if you want to install additional dependencies
-            # apt-get update && apt-get install -y <other_dependencies>
-            echo "Dependencies installed"
-      - run:
-          name: Build with Maven
-          command: mvn clean install  # This will run the Maven build command
-      - run:
-          name: Run SonarQube Scan
-          command: |
-            sonar-scanner \
-              -Dsonar.projectKey=apds-poe-mrjl \
-              -Dsonar.organization=apds-poe-mrjl \
-              -Dsonar.sources=src  # This will run the SonarQube scan after building
+      - image: circleci/node:18
+    working_directory: ~/repo
 
-  # Optionally, add a job to deploy or perform further actions after successful build
-  deploy:
-    docker:
-      - image: circleci/openjdk:17.0.1-jdk-buster
+jobs:
+  build-and-scan:
+    executor: node-executor
+
     steps:
       - checkout
-      - run:
-          name: Deploy to production (example)
-          command: echo "Deploying application"  # This is just a placeholder
 
-# Define workflows
-workflows:
-  version: 2
-  build_and_scan:
-    jobs:
-      - build  # Run the build and SonarQube scan job
-      # Uncomment the following line if you need to deploy after build
-      # - deploy:
-      #     requires:
-      #       - build  # Only deploy if the build job succeeds
+      # Set up environment variables for SonarQube
+      - run:
+          name: Set up SonarQube environment variables
+          command: |
+            echo 'export SONAR_TOKEN=${SONAR_TOKEN2}' >> $BASH_ENV
+            echo 'export SONAR_PROJECT_KEY="APDS-POE-MRJL_APDS-POE"' >> $BASH_ENV
+            echo 'export SONAR_ORGANIZATION="apds-poe-mrjl"' >> $BASH_ENV
+            echo 'export SONAR_HOST_URL="https://sonarcloud.io"' >> $BASH_ENV
+            source $BASH_ENV
+
+      # Install dependencies
+      - run:
+          name: Install dependencies
+          command: npm install
+
+      # Run SonarQube scan
+      - run:
+          name: Run SonarQube scan
+          command: |
+            npx sonar-scanner \
+              -Dsonar.projectKey=$SONAR_PROJECT_KEY \
+              -Dsonar.organization=$SONAR_ORGANIZATION \
+              -Dsonar.sources=./src \
+              -Dsonar.host.url=$SONAR_HOST_URL \
+              -Dsonar.login=$SONAR_TOKEN2
