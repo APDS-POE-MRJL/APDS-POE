@@ -32,11 +32,11 @@ jobs:
           name: Run SonarCloud scan
           command: |
             npx sonar-scanner \
-              -Dsonar.projectKey=$SONAR_PROJECT_KEY \
-              -Dsonar.organization=$SONAR_ORGANIZATION \
+              -Dsonar.projectKey=APDS-POE-MRJL_APDS-POE \
+              -Dsonar.organization=apds-poe-mrjl \
               -Dsonar.sources=./src \
-              -Dsonar.host.url=$SONAR_HOST_URL \
-              -Dsonar.login=$SONAR_TOKEN
+              -Dsonar.host.url="https://sonarcloud.io" \
+              -Dsonar.login=$SONAR_TOKEN2
 
 workflows:
   version: 2
