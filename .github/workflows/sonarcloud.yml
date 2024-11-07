@@ -17,11 +17,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Set up Node.js (using the appropriate version for your project)
+      # Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16'  # Adjust to the version you are using
+          node-version: '16'
 
       # Install dependencies
       - name: Install dependencies
@@ -36,7 +36,6 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN2 }}
           SONAR_HOST_URL: https://sonarcloud.io
 
-      # Optionally, if you have tests defined in your package.json:
+      # Optionally, run tests if you have defined them
       - name: Run tests
-        run: npm test  # If your project has tests defined
-
+        run: npm test  # Optional if tests are configured
