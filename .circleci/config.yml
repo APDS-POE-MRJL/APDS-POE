@@ -17,7 +17,7 @@ jobs:
       - run:
           name: Set up SonarCloud environment variables
           command: |
-            echo 'export SONAR_TOKEN=${SONAR_TOKEN2}' >> $BASH_ENV
+            echo 'export SONAR_TOKEN=${SONAR_TOKEN}' >> $BASH_ENV  # Ensure you set this as an environment variable in CircleCI
             echo 'export SONAR_PROJECT_KEY="APDS-POE-MRJL_APDS-POE"' >> $BASH_ENV
             echo 'export SONAR_ORGANIZATION="apds-poe-mrjl"' >> $BASH_ENV
             echo 'export SONAR_HOST_URL="https://sonarcloud.io"' >> $BASH_ENV
@@ -28,12 +28,12 @@ jobs:
           name: Install dependencies
           command: npm install
 
-      # Step 4: Install SonarQube Scanner globally
+      # Step 4: Install SonarScanner globally (this is the official scanner for SonarCloud)
       - run:
-          name: Install SonarQube Scanner
-          command: npm install -g sonarqube-scanner
+          name: Install SonarScanner globally
+          command: npm install -g sonar-scanner
 
-      # Step 5: Run the SonarQube scan using sonar-scanner
+      # Step 5: Run SonarCloud scan using sonar-scanner
       - run:
           name: Run SonarCloud scan
           command: |
@@ -42,7 +42,7 @@ jobs:
               -Dsonar.organization=$SONAR_ORGANIZATION \
               -Dsonar.sources=./src \
               -Dsonar.host.url=$SONAR_HOST_URL \
-              -Dsonar.login=$SONAR_TOKEN
+              -Dsonar.login=$SONAR_TOKEN  # This is the authentication token
 
 workflows:
   version: 2
