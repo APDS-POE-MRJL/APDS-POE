@@ -33,12 +33,12 @@ jobs:
           name: Install SonarQube Scanner
           command: npm install -g sonarqube-scanner
 
-      # Step 5: Debug permissions of sonar-scanner binary
+      # Step 5: Verify the installation location of sonar-scanner
       - run:
-          name: Debug permissions of sonar-scanner
+          name: Debug sonar-scanner installation
           command: |
-            ls -l /usr/local/lib/node_modules/sonar-scanner/bin/sonar-scanner  # Check permissions
-            chmod 777 /usr/local/lib/node_modules/sonar-scanner/bin/sonar-scanner  # Try granting full permissions
+            which sonar-scanner  # This will show the path of the sonar-scanner binary
+            ls -l $(which sonar-scanner)  # List the details of the binary
 
       # Step 6: Run the SonarCloud scan
       - run:
