@@ -1,11 +1,9 @@
-# .circleci/config.yml
-
 version: 2.1
 
 executors:
   node-executor:
     docker:
-      - image: circleci/node:18
+      - image: node:18  # Using the official Node image from Docker Hub
     working_directory: ~/repo
 
 jobs:
