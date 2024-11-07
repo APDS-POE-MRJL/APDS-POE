@@ -4,15 +4,17 @@ executors:
   node-executor:
     docker:
       - image: node:18  # Using the official Node image to avoid image issues
-    working_directory: ~/repo
+    working_directory: ~/repo  # Define the working directory for the job
 
 jobs:
+  # Build and SonarCloud scan job
   build-and-scan:
     executor: node-executor
     steps:
+      # Step 1: Checkout the code
       - checkout
 
-      # Set up environment variables for SonarCloud
+      # Step 2: Set up SonarCloud environment variables
       - run:
           name: Set up SonarCloud environment variables
           command: |
@@ -22,24 +24,24 @@ jobs:
             echo 'export SONAR_HOST_URL="https://sonarcloud.io"' >> $BASH_ENV
             source $BASH_ENV
 
-      # Install project dependencies
+      # Step 3: Install project dependencies
       - run:
           name: Install dependencies
           command: npm install
 
-      # Run SonarCloud scan using npx
+      # Step 4: Run the SonarCloud scan using npx
       - run:
           name: Run SonarCloud scan
           command: |
             npx sonar-scanner \
-              -Dsonar.projectKey=APDS-POE-MRJL_APDS-POE \
-              -Dsonar.organization=apds-poe-mrjl \
+              -Dsonar.projectKey=$SONAR_PROJECT_KEY \
+              -Dsonar.organization=$SONAR_ORGANIZATION \
               -Dsonar.sources=./src \
-              -Dsonar.host.url="https://sonarcloud.io" \
-              -Dsonar.login=$SONAR_TOKEN2
+              -Dsonar.host.url=$SONAR_HOST_URL \
+              -Dsonar.login=$SONAR_TOKEN
 
 workflows:
   version: 2
   build_and_scan_workflow:
     jobs:
-      - build-and-scan
+      - build-and-scan  # Only one job in the workflow, referring to build-and-scan
