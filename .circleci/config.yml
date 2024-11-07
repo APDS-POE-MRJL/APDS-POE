@@ -1,10 +1,15 @@
-jobs:
-  build-and-scan:
-    executor:
-      docker:
-        - image: node:18
-      working_directory: ~/repo
+version: 2.1
 
+executors:
+  node-executor:
+    docker:
+      - image: node:18  # Using the official Node image to avoid image issues
+    working_directory: ~/repo
+
+jobs:
+  # Build and SonarQube scan job
+  build-and-scan:
+    executor: node-executor
     steps:
       - checkout
 
@@ -43,3 +48,9 @@ jobs:
               -Dsonar.sources=./src \
               -Dsonar.host.url=$SONAR_HOST_URL \
               -Dsonar.login=$SONAR_TOKEN2
+
+workflows:
+  version: 2
+  build_and_scan_workflow:
+    jobs:
+      - build-and-scan  # Referencing the correct job name here
