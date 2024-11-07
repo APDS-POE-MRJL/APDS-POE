@@ -10,31 +10,33 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # You can change this to another OS if required, e.g., 'windows-latest'
+    runs-on: ubuntu-latest
 
     steps:
+      # Checkout the code
       - name: Checkout code
-        uses: actions/checkout@v3  # This checks out your repository
+        uses: actions/checkout@v3
 
-      # Set up Node.js (If using Node.js, adjust version as necessary)
+      # Set up Node.js (using the appropriate version for your project)
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16'  # Adjust this to your Node.js version
+          node-version: '16'  # Adjust to the version you are using
 
-      # Install dependencies (for Node.js, assumes you have package.json)
+      # Install dependencies
       - name: Install dependencies
-        run: npm install  # Or `yarn install` if you're using Yarn
-
-      # Run your build or tests (adjust this to your specific setup)
-      - name: Build project
-        run: npm run build  # Adjust the script based on your package.json, or use another build command
+        run: npm install
 
       # Run SonarCloud analysis
       - name: Run SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v3
         with:
-          args: -Dsonar.projectKey=apds-poe-mrjl -Dsonar.organization=apds-poe-mrjl
+          args: -Dsonar.projectKey=APDS-POE-MRJL_APDS-POE -Dsonar.organization=apds-poe-mrjl
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN2 }}
           SONAR_HOST_URL: https://sonarcloud.io
+
+      # Optionally, if you have tests defined in your package.json:
+      - name: Run tests
+        run: npm test  # If your project has tests defined
+
