@@ -1,17 +1,9 @@
-# .circleci/config.yml
-
-version: 2.1
-
-executors:
-  node-executor:
-    docker:
-      - image: node:18  # Using the official Node image to avoid image issues
-    working_directory: ~/repo
-
 jobs:
-  # Build and SonarQube scan job
   build-and-scan:
-    executor: node-executor
+    executor:
+      docker:
+        - image: node:18
+      working_directory: ~/repo
 
     steps:
       - checkout
@@ -36,6 +28,11 @@ jobs:
           name: Install sonar-scanner locally
           command: npm install sonar-scanner
 
+      # Ensure sonar-scanner has execute permissions
+      - run:
+          name: Set permissions for sonar-scanner
+          command: chmod +x ./node_modules/sonar-scanner/bin/sonar-scanner
+
       # Run SonarQube scan using npx
       - run:
           name: Run SonarQube scan
@@ -46,9 +43,3 @@ jobs:
               -Dsonar.sources=./src \
               -Dsonar.host.url=$SONAR_HOST_URL \
               -Dsonar.login=$SONAR_TOKEN2
-
-workflows:
-  version: 2
-  build_and_scan_workflow:
-    jobs:
-      - build-and-scan
