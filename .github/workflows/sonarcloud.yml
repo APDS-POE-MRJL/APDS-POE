@@ -10,36 +10,38 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Use the latest Ubuntu environment
+    runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Set up JDK 17
+      # Set up Java 17
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
-          java-version: '17'  # Use Java 17
-          distribution: 'temurin'  # Use Eclipse Temurin JDK distribution
+          java-version: '17'
+          distribution: 'temurin'
 
-      # Step 3: List directory structure (optional for debugging)
-      - name: List directory structure
-        run: ls -R
+      # Install Gradle (if not already installed on CI)
+      - name: Install Gradle
+        run: |
+          wget https://services.gradle.org/distributions/gradle-7.5-bin.zip
+          unzip gradle-7.5-bin.zip
+          sudo mv gradle-7.5 /opt/gradle
+          echo 'export PATH=$PATH:/opt/gradle/bin' >> ~/.bashrc
+          source ~/.bashrc
 
-      # Step 4: Build with Gradle
+      # Build your project using Gradle (no gradlew wrapper)
       - name: Build with Gradle
-        run: ./gradlew build  # Adjust this if your Gradle task is different
-        working-directory: ./APDS-POE/frontend  # Ensure the correct working directory for Gradle
+        run: gradle build
+        working-directory: ./APDS-POE  # Adjust this path if needed
 
-      # Step 5: Run SonarCloud analysis
+      # Run SonarCloud analysis
       - name: Run SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v2
+        uses: SonarSource/sonarqube-scan-action@v3
         with:
-          args: |
-            -Dsonar.projectKey=apds-poe-mrjl
-            -Dsonar.organization=apds-poe-mrjl
-            -Dsonar.sources=./APDS-POE/src  # Adjust source directory as needed
+          args: -Dsonar.projectKey=apds-poe-mrjl -Dsonar.organization=apds-poe-mrjl
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN2 }}  # Use GitHub secret for security
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
