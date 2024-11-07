@@ -4,19 +4,17 @@ executors:
   node-executor:
     docker:
       - image: node:18  # Using the official Node image to avoid image issues
-    working_directory: ~/repo  # Define the working directory for the job
+    working_directory: ~/repo
 
 jobs:
-  # Build and SonarQube scan job
   build-and-scan:
     executor: node-executor
     steps:
-      # Step 1: Checkout the code
       - checkout
 
-      # Step 2: Set up SonarQube environment variables
+      # Set up environment variables for SonarCloud
       - run:
-          name: Set up SonarQube environment variables
+          name: Set up SonarCloud environment variables
           command: |
             echo 'export SONAR_TOKEN=${SONAR_TOKEN2}' >> $BASH_ENV
             echo 'export SONAR_PROJECT_KEY="APDS-POE-MRJL_APDS-POE"' >> $BASH_ENV
@@ -24,34 +22,24 @@ jobs:
             echo 'export SONAR_HOST_URL="https://sonarcloud.io"' >> $BASH_ENV
             source $BASH_ENV
 
-      # Step 3: Install project dependencies
+      # Install project dependencies
       - run:
           name: Install dependencies
           command: npm install
 
-      # Step 4: Install sonar-scanner locally
+      # Run SonarCloud scan using npx
       - run:
-          name: Install sonar-scanner locally
-          command: npm install sonar-scanner
-
-      # Step 5: Set permissions for sonar-scanner to make it executable
-      - run:
-          name: Set permissions for sonar-scanner
-          command: chmod +x ./node_modules/sonar-scanner/bin/sonar-scanner
-
-      # Step 6: Run the SonarQube scan using npx
-      - run:
-          name: Run SonarQube scan
+          name: Run SonarCloud scan
           command: |
             npx sonar-scanner \
               -Dsonar.projectKey=$SONAR_PROJECT_KEY \
               -Dsonar.organization=$SONAR_ORGANIZATION \
               -Dsonar.sources=./src \
               -Dsonar.host.url=$SONAR_HOST_URL \
-              -Dsonar.login=$SONAR_TOKEN2
+              -Dsonar.login=$SONAR_TOKEN
 
 workflows:
   version: 2
   build_and_scan_workflow:
     jobs:
-      - build-and-scan  # Only one job in the workflow, referring to build-and-scan
+      - build-and-scan
