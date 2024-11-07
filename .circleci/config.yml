@@ -17,10 +17,10 @@ jobs:
       - run:
           name: Set up SonarCloud environment variables
           command: |
-            echo 'export SONAR_TOKEN=${SONAR_TOKEN}' >> $BASH_ENV  # Ensure you set this as an environment variable in CircleCI
+            echo 'export SONAR_TOKEN=${SONAR_TOKEN2}' >> $BASH_ENV  # Ensure you set this as an environment variable in CircleCI
             echo 'export SONAR_PROJECT_KEY="APDS-POE-MRJL_APDS-POE"' >> $BASH_ENV
             echo 'export SONAR_ORGANIZATION="apds-poe-mrjl"' >> $BASH_ENV
-            echo 'export SONAR_HOST_URL="https://sonarcloud.io"' >> $BASH_ENV
+            echo 'export SONAR_HOST_URL="SONAR_HOST_URL"' >> $BASH_ENV
             source $BASH_ENV
 
       # Step 3: Install project dependencies
