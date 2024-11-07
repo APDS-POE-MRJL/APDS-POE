@@ -3,11 +3,10 @@ version: 2.1
 executors:
   node-executor:
     docker:
-      - image: node:18  # Using the official Node image to avoid image issues
-    working_directory: ~/repo  # Define the working directory for the job
+      - image: node:18  # Using the official Node image
+    working_directory: ~/repo
 
 jobs:
-  # Build and SonarCloud scan job
   build-and-scan:
     executor: node-executor
     steps:
@@ -29,11 +28,16 @@ jobs:
           name: Install dependencies
           command: npm install
 
-      # Step 4: Run the SonarCloud scan using npx
+      # Step 4: Install SonarQube Scanner globally
+      - run:
+          name: Install SonarQube Scanner
+          command: npm install -g sonarqube-scanner
+
+      # Step 5: Run the SonarQube scan using sonar-scanner
       - run:
           name: Run SonarCloud scan
           command: |
-            npx sonar-scanner.bat \
+            sonar-scanner \
               -Dsonar.projectKey=$SONAR_PROJECT_KEY \
               -Dsonar.organization=$SONAR_ORGANIZATION \
               -Dsonar.sources=./src \
@@ -44,4 +48,4 @@ workflows:
   version: 2
   build_and_scan_workflow:
     jobs:
-      - build-and-scan  # Only one job in the workflow, referring to build-and-scan
+      - build-and-scan
