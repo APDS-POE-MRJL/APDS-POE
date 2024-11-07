@@ -1,12 +1,15 @@
+# .circleci/config.yml
+
 version: 2.1
 
 executors:
   node-executor:
     docker:
-      - image: node:18  # Using the official Node image from Docker Hub
+      - image: node:18  # Using the official Node image to avoid image issues
     working_directory: ~/repo
 
 jobs:
+  # Build and SonarQube scan job
   build-and-scan:
     executor: node-executor
 
@@ -23,22 +26,28 @@ jobs:
             echo 'export SONAR_HOST_URL="https://sonarcloud.io"' >> $BASH_ENV
             source $BASH_ENV
 
-      # Install dependencies
+      # Install project dependencies
       - run:
           name: Install dependencies
           command: npm install
+
+      # Install sonar-scanner globally
+      - run:
+          name: Install sonar-scanner globally
+          command: npm install -g sonar-scanner
 
       # Run SonarQube scan
       - run:
           name: Run SonarQube scan
           command: |
-            npx sonar-scanner \
+            sonar-scanner \
               -Dsonar.projectKey=$SONAR_PROJECT_KEY \
               -Dsonar.organization=$SONAR_ORGANIZATION \
               -Dsonar.sources=./src \
               -Dsonar.host.url=$SONAR_HOST_URL \
               -Dsonar.login=$SONAR_TOKEN2
 
+# Define the workflow to run the build and scan job
 workflows:
   version: 2
   build_and_scan_workflow:
