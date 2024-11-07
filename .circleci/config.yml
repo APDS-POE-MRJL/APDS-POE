@@ -4,7 +4,7 @@ executors:
   node-executor:
     docker:
       - image: node:18  # Using the official Node image
-    working_directory: ~/repo
+    working_directory: ~/repo  # Working directory for the project
 
 jobs:
   build-and-scan:
@@ -17,10 +17,10 @@ jobs:
       - run:
           name: Set up SonarCloud environment variables
           command: |
-            echo 'export SONAR_TOKEN=${SONAR_TOKEN2}' >> $BASH_ENV  # Ensure you set this as an environment variable in CircleCI
+            echo 'export SONAR_TOKEN=${SONAR_TOKEN2}' >> $BASH_ENV
             echo 'export SONAR_PROJECT_KEY="APDS-POE-MRJL_APDS-POE"' >> $BASH_ENV
             echo 'export SONAR_ORGANIZATION="apds-poe-mrjl"' >> $BASH_ENV
-            echo 'export SONAR_HOST_URL="SONAR_HOST_URL"' >> $BASH_ENV
+            echo 'export SONAR_HOST_URL="https://sonarcloud.io"' >> $BASH_ENV
             source $BASH_ENV
 
       # Step 3: Install project dependencies
@@ -28,12 +28,19 @@ jobs:
           name: Install dependencies
           command: npm install
 
-      # Step 4: Install SonarScanner globally (this is the official scanner for SonarCloud)
+      # Step 4: Install SonarQube Scanner globally
       - run:
-          name: Install SonarScanner globally
-          command: npm install -g sonar-scanner
+          name: Install SonarQube Scanner
+          command: npm install -g sonarqube-scanner
 
-      # Step 5: Run SonarCloud scan using sonar-scanner
+      # Step 5: Debug permissions of sonar-scanner binary
+      - run:
+          name: Debug permissions of sonar-scanner
+          command: |
+            ls -l /usr/local/lib/node_modules/sonar-scanner/bin/sonar-scanner  # Check permissions
+            chmod 777 /usr/local/lib/node_modules/sonar-scanner/bin/sonar-scanner  # Try granting full permissions
+
+      # Step 6: Run the SonarCloud scan
       - run:
           name: Run SonarCloud scan
           command: |
@@ -42,7 +49,7 @@ jobs:
               -Dsonar.organization=$SONAR_ORGANIZATION \
               -Dsonar.sources=./src \
               -Dsonar.host.url=$SONAR_HOST_URL \
-              -Dsonar.login=$SONAR_TOKEN  # This is the authentication token
+              -Dsonar.login=$SONAR_TOKEN
 
 workflows:
   version: 2
