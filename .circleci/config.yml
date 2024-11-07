@@ -4,16 +4,17 @@ executors:
   node-executor:
     docker:
       - image: node:18  # Using the official Node image to avoid image issues
-    working_directory: ~/repo
+    working_directory: ~/repo  # Define the working directory for the job
 
 jobs:
   # Build and SonarQube scan job
   build-and-scan:
     executor: node-executor
     steps:
+      # Step 1: Checkout the code
       - checkout
 
-      # Set up environment variables for SonarQube
+      # Step 2: Set up SonarQube environment variables
       - run:
           name: Set up SonarQube environment variables
           command: |
@@ -23,22 +24,22 @@ jobs:
             echo 'export SONAR_HOST_URL="https://sonarcloud.io"' >> $BASH_ENV
             source $BASH_ENV
 
-      # Install project dependencies
+      # Step 3: Install project dependencies
       - run:
           name: Install dependencies
           command: npm install
 
-      # Install sonar-scanner locally
+      # Step 4: Install sonar-scanner locally
       - run:
           name: Install sonar-scanner locally
           command: npm install sonar-scanner
 
-      # Ensure sonar-scanner has execute permissions
+      # Step 5: Set permissions for sonar-scanner to make it executable
       - run:
           name: Set permissions for sonar-scanner
           command: chmod +x ./node_modules/sonar-scanner/bin/sonar-scanner
 
-      # Run SonarQube scan using npx
+      # Step 6: Run the SonarQube scan using npx
       - run:
           name: Run SonarQube scan
           command: |
@@ -47,10 +48,10 @@ jobs:
               -Dsonar.organization=$SONAR_ORGANIZATION \
               -Dsonar.sources=./src \
               -Dsonar.host.url=$SONAR_HOST_URL \
-              -Dsonar.login=$SONAR_TOKEN
+              -Dsonar.login=$SONAR_TOKEN2
 
 workflows:
   version: 2
   build_and_scan_workflow:
     jobs:
-      - build-and-scan  # Referencing the correct job name here
+      - build-and-scan  # Only one job in the workflow, referring to build-and-scan
