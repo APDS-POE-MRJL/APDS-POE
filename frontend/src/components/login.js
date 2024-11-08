@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom"; // Import useLocation
+import { useNavigate, useLocation } from "react-router-dom"; 
 import "bootstrap/dist/css/bootstrap.min.css";
 
 export default function Login() {
@@ -10,15 +10,15 @@ export default function Login() {
   });
 
   const navigate = useNavigate();
-  const location = useLocation(); // Get the location object
+  const location = useLocation();
 
-  // Use useEffect to check if there is state passed from the Register component
+  // Check if there is state passed from the Register component
   useEffect(() => {
     if (location.state) {
       const { userName, accountNumber } = location.state;
       window.alert(`Registration Successful!\nYour username: ${userName}\nYour account number: ${accountNumber}`);
     }
-  }, [location.state]); // Only run when the location state changes
+  }, [location.state]);
 
   function updateForm(value) {
     setForm(prev => ({ ...prev, ...value }));
@@ -27,31 +27,37 @@ export default function Login() {
   async function onSubmit(e) {
     e.preventDefault();
 
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/user/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    }).catch(error => {
-      window.alert("Login failed: " + error);
-      return;
-    });
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/user/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
 
-    if (!response.ok) {
-      window.alert("Invalid credentials, please try again!");
-      return;
+      if (!response.ok) {
+        window.alert("Invalid credentials, please try again!");
+        return;
+      }
+
+      const data = await response.json();
+      const { token, accountNumber } = data;
+
+      window.alert("Authentication successful!");
+
+      // Store token and account number in local storage
+      localStorage.setItem("JWT", token);
+      localStorage.setItem("accountNumber", accountNumber);
+
+      // Reset form
+      setForm({ userName: "", password: "", accountNumber: "" });
+
+      // Navigate to the home page and refresh
+      navigate("/");
+      window.location.reload();
+
+    } catch (error) {
+      window.alert("Login failed: " + error.message);
     }
-
-    const data = await response.json();
-    const { token, accountNumber } = data;
-
-    window.alert("Authentication successful!");
-
-    localStorage.setItem("JWT", token);
-    localStorage.setItem("accountNumber", accountNumber);
-
-    setForm({ userName: "", password: "", accountNumber: "" });
-    navigate("/");
-    window.location.reload();
   }
 
   return (

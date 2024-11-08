@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import "../App.css";
 
 const Post = (props) => (
@@ -9,10 +8,10 @@ const Post = (props) => (
     <td>
       {props.post.image && (
         <img
-          src={`data:image/jpeg;base64,${props.post.image}`}
-          alt="Post Image"
-          style={{ maxWidth: "100px", maxHeight: "100px", objectFit: "cover" }}
-        />
+        src={`data:image/jpeg;base64,${props.post.image}`}
+        alt={props.post.content ? `Image related to ${props.post.content}` : ""}
+        style={{ maxWidth: "100px", maxHeight: "100px", objectFit: "cover" }}
+      />
       )}
     </td>
     <td>
