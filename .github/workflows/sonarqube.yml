@@ -9,34 +9,37 @@ on:
       - main
 
 jobs:
-  build:
+  sonarcloud:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout the code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set environment variables
-        run: |
-          echo "SONAR_TOKEN=${{ secrets.SONAR_TOKEN }}" >> $GITHUB_ENV
-          echo "SONAR_PROJECT_KEY=APDS-POE-MRJL_APDS-POE" >> $GITHUB_ENV
-          echo "SONAR_ORGANIZATION=apds-poe-mrjl" >> $GITHUB_ENV
-          echo "SONAR_HOST_URL=https://sonarcloud.io" >> $GITHUB_ENV
-
-      - name: Set up Java
-        uses: actions/setup-java@v2
+      # Step 2: Set up Node.js environment (using Node.js 18 as specified)
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
-          java-version: 17
+          node-version: '18'
 
-      - name: Run SonarCloud analysis
-        uses: SonarSource/sonarqube-scan-action@v3
-        with:
-          args: -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }} -Dsonar.organization=${{ env.SONAR_ORGANIZATION }}
-          projectBaseDir: .
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Step 4: Install SonarCloud Scanner
+      - name: Install SonarCloud Scanner
+        run: npm install -g sonarqube-scanner
+
+      # Step 5: Run SonarCloud scan
+      - name: Run SonarCloud scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
-
-      # Optionally, run tests
-      - name: Run tests
-        run: npm test
+          SONAR_HOST_URL: 'https://sonarcloud.io'
+        run: |
+          sonar-scanner \
+            -Dsonar.projectKey="APDS-POE-MRJL_APDS-POE" \
+            -Dsonar.organization="apds-poe-mrjl" \
+            -Dsonar.sources="frontend/src" \
+            -Dsonar.host.url="$SONAR_HOST_URL" \
+            -Dsonar.login="$SONAR_TOKEN"
