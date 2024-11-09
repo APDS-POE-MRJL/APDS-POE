@@ -51,10 +51,10 @@ export default function Navbar() {
                 // Admin-only links
                 <>
                   <li className="nav-item mx-3">
-                    <NavLink className="nav-link" to="/admin/transactionlist">All Transactions</NavLink>
+                    <NavLink className="nav-link" to="/admin/transactionlist">Pending Transaction List</NavLink>
                   </li>
                   <li className="nav-item mx-3">
-                    <NavLink className="nav-link" to="/admin/auditlist">All Audits</NavLink>
+                    <NavLink className="nav-link" to="/admin/auditlist">All Transactions</NavLink>
                   </li>
                 </>
               )}
