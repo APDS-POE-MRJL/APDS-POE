@@ -56,7 +56,7 @@ export default function Navbar() {
                 <NavLink className="nav-link" to="/transactionCreate">Create Transaction</NavLink>
               </li>
               <li className="nav-item mx-3">
-                <NavLink className="nav-link" to="/list">Transaction List</NavLink>
+                <NavLink className="nav-link" to="/transactionList">Transaction List</NavLink>
               </li>
               <li className="nav-item mx-3">
                 <NavLink className="nav-link" to="/auditList">Audit List</NavLink>

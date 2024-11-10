@@ -10,6 +10,7 @@ import Homepage from "./components/homepage.js";
 //import AdminSignup from "./components/adminsignup.js"; 
 import TransactionCreate from './components/transactionCreate.js';
 import AuditList from "./components/auditList.js";
+import TransactionList from "./components/transactionList.js";
 
 
 const App = () => {
@@ -23,6 +24,7 @@ const App = () => {
       {/*   <Route path="/adminsignup" element={<AdminSignup />} /> {/* Add the AdminSignup route */}
       <Route path="/transactionCreate" element={<TransactionCreate />} />
       <Route path="/auditList" element={<AuditList />} />
+      <Route path="/transactionList" element={<TransactionList />} />
       </Routes>
     </div>
   );

@@ -140,7 +140,7 @@ async function onSubmit(e) {
       console.log("Transaction success data:", data);
       window.alert("Transaction submitted successfully!");
 
-      navigate("/list"); // Navigate to the transaction list page
+      navigate("/transactionList"); // Navigate to the transaction list page
   } catch (error) {
       console.error("Error during transaction submission:", error);
       window.alert(`An error occurred: ${error.message}`);
