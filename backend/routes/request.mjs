@@ -43,33 +43,40 @@ router.get("/list", async (req, res) => {
 
 
 //This page is for both users, users can see all requests and admins can see all requests (like an audit log)
+
 router.get("/auditlist", async (req, res) => {
     try {
         // Assuming the token is passed in the Authorization header as a Bearer token
         const token = req.headers.authorization.split(" ")[1];
         let decodedToken;
+        
         try {
             decodedToken = jwt.verify(token, "secret_key");
         } catch (error) {
             return res.status(401).json({ message: "Invalid token" });
         }
+
         const role = decodedToken.role;
+        const accountNumber = decodedToken.accountNumber; // Make sure to get the account number from the token if needed
 
-        if (role === "user") {
-            query.sender = accountNumber;
-        }
-
+        // Initialize the query object here
         let query = { status: { $in: ["Pending", "Approved", "Rejected"] } };
+
+        // If the role is 'user', filter the query based on accountNumber
+        if (role === "user") {
+            query.sender = accountNumber;  // Assuming 'sender' is the field you want to filter by
+        }
 
         let collection = await requestsDb.collection("requests");
         let results = await collection.find(query).toArray();
 
-        res.status(200).json(results);
+        res.status(200).json(results);  // Send the results back to the client
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Request failed" });
     }
 });
+
 
 //This page is for end users to create a request, this can be accessed by all
 // In /create endpoint of request.mjs

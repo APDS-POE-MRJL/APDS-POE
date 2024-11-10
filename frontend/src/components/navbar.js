@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import logo from "../logo.svg";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 export default function Navbar() {
   const [role, setRole] = useState(null);
+  const navigate = useNavigate(); // Initialize useNavigate hook
 
   useEffect(() => {
     const jwt = localStorage.getItem("JWT");
@@ -18,7 +19,7 @@ export default function Navbar() {
     localStorage.removeItem("JWT");
     localStorage.removeItem("name");
     setRole(null);
-    window.location.reload();
+    navigate("/login"); // Redirect to the login page
   };
 
   return (
@@ -42,19 +43,13 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              {role === "admin" && (
+              {role === "user" && (
                 <>
                   <li className="nav-item mx-3">
-                    <NavLink className="nav-link" to="/admin/transactionlist">Pending Transaction List</NavLink>
-                  </li>
-                  <li className="nav-item mx-3">
-                    <NavLink className="nav-link" to="/admin/auditlist">All Transactions</NavLink>
+                    <NavLink className="nav-link" to="/transactionCreate">Create Transaction</NavLink>
                   </li>
                 </>
               )}
-              <li className="nav-item mx-3">
-                <NavLink className="nav-link" to="/transactionCreate">Create Transaction</NavLink>
-              </li>
               <li className="nav-item mx-3">
                 <NavLink className="nav-link" to="/transactionList">Transaction List</NavLink>
               </li>
