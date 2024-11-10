@@ -12,6 +12,7 @@ export default function TransactionList() {
   useEffect(() => {
     // Function to fetch transactions
     const fetchTransactions = async () => {
+      document.body.style.backgroundColor = "#333333";
       try {
         const token = localStorage.getItem("JWT"); // Assuming JWT is stored in localStorage
 
@@ -152,21 +153,25 @@ export default function TransactionList() {
   }
 
   return (
+    
+    
+    
     <div
       className="container mt-4"
       style={{
-        backgroundColor: "#f0f0f0",
+        backgroundColor: "#34495e",
         padding: "20px",
         borderRadius: "8px",
+        color: "#f1f1f1"
       }}
     >
-      <h2 className="text-center mb-4">Requests</h2>
-
+      <h2 className="text-center mb-4" style={{ color: "#f1f1f1" }}>Requests</h2>
+  
       {transactions.length === 0 ? (
         <div className="text-center">No requests</div>
       ) : (
-        <table className="table table-bordered">
-          <thead>
+        <table className="table table-bordered" style={{ backgroundColor: "#333333", color: "#f1f1f1" }}>
+          <thead style={{ color: "#f1c40f" }}>
             <tr>
               <th>Sender</th>
               <th>Amount</th>
@@ -175,7 +180,7 @@ export default function TransactionList() {
               <th>Provider</th>
               <th>Code</th>
               <th>Status</th>
-              {role === "admin" && <th>Actions</th>} {/* Only show actions if the role is admin */}
+              {role === "admin" && <th>Actions</th>}
             </tr>
           </thead>
           <tbody>
@@ -188,7 +193,7 @@ export default function TransactionList() {
                       onClick={(e) => {
                         e.preventDefault();
                         fetchUserProfile(transaction.sender);
-                      }}
+                      }}                      
                     >
                       {transaction.sender}
                     </a>
@@ -205,7 +210,7 @@ export default function TransactionList() {
                       onClick={(e) => {
                         e.preventDefault();
                         fetchUserProfile(transaction.recipient);
-                      }}
+                      }}              
                     >
                       {transaction.recipient}
                     </a>
@@ -221,13 +226,22 @@ export default function TransactionList() {
                     {transaction.status === "Pending" && (
                       <>
                         <button
-                          className="btn btn-success mr-2"
+                          className="btn"
+                          style={{
+                            backgroundColor: "#28a745",
+                            color: "#ffffff",
+                            marginRight: "5px"
+                          }}
                           onClick={() => approveTransaction(transaction._id)}
                         >
                           Approve
                         </button>
                         <button
-                          className="btn btn-danger"
+                          className="btn"
+                          style={{
+                            backgroundColor: "#dc3545",
+                            color: "#ffffff"
+                          }}
                           onClick={() => rejectTransaction(transaction._id)}
                         >
                           Reject
@@ -241,7 +255,7 @@ export default function TransactionList() {
           </tbody>
         </table>
       )}
-
+  
       {userProfile && (
         <div className="alert alert-warning mt-4">
           <h5>User Profile</h5>
@@ -252,7 +266,7 @@ export default function TransactionList() {
           <p><strong>Role:</strong> {userProfile.role}</p>
         </div>
       )}
-
+  
       {profileError && (
         <div className="alert alert-danger mt-4">
           {profileError}
@@ -260,4 +274,5 @@ export default function TransactionList() {
       )}
     </div>
   );
+  
 }

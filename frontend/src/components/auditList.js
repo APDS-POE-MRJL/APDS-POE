@@ -88,12 +88,12 @@ export default function AuditList() {
     <div
       className="container mt-4"
       style={{
-        backgroundColor: "#f0f0f0",
+        backgroundColor: "#34495e",
         padding: "20px",
         borderRadius: "8px",
       }}
     >
-      <h2 className="text-center mb-4">Audit List</h2>
+      <h2 className="text-center mb-4"style={{ color: "#f1f1f1" }}>Audit List</h2>
 
       {transactions.length === 0 ? (
         <div className="text-center">No audit records found</div>
