@@ -6,6 +6,8 @@ export default function TransactionList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [role, setRole] = useState(null); // Store the user's role
+  const [userProfile, setUserProfile] = useState(null); // For viewing user profile details
+  const [profileError, setProfileError] = useState(null);
 
   useEffect(() => {
     // Function to fetch transactions
@@ -18,7 +20,7 @@ export default function TransactionList() {
         }
 
         // Decode the token to extract the user's role
-        const decodedToken = JSON.parse(atob(token.split('.')[1])); // Decode base64 part of JWT
+        const decodedToken = JSON.parse(atob(token.split(".")[1])); // Decode base64 part of JWT
         const userRole = decodedToken.role;
         setRole(userRole); // Set the role (assuming it's in the token)
 
@@ -45,6 +47,37 @@ export default function TransactionList() {
 
     fetchTransactions();
   }, []);
+
+  // Function to fetch user profile based on account number
+  const fetchUserProfile = async (accountNumber) => {
+    try {
+      const token = localStorage.getItem("JWT");
+
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/user/locate?accountNumber=${accountNumber}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        setProfileError("User profile not found");
+        setUserProfile(null);
+        return;
+      }
+
+      const profileData = await response.json();
+      setUserProfile(profileData);
+      setProfileError(null);
+    } catch (err) {
+      setProfileError("An error occurred while fetching the profile.");
+      setUserProfile(null);
+    }
+  };
 
   // Approve a transaction
   const approveTransaction = async (transactionId) => {
@@ -136,7 +169,11 @@ export default function TransactionList() {
           <thead>
             <tr>
               <th>Sender</th>
+              <th>Amount</th>
+              <th>Currency</th>
               <th>Recipient</th>
+              <th>Provider</th>
+              <th>Code</th>
               <th>Status</th>
               {role === "admin" && <th>Actions</th>} {/* Only show actions if the role is admin */}
             </tr>
@@ -144,8 +181,40 @@ export default function TransactionList() {
           <tbody>
             {transactions.map((transaction) => (
               <tr key={transaction._id}>
-                <td>{transaction.sender}</td>
-                <td>{transaction.recipient}</td>
+                <td>
+                  {role === "admin" ? (
+                    <a
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        fetchUserProfile(transaction.sender);
+                      }}
+                    >
+                      {transaction.sender}
+                    </a>
+                  ) : (
+                    transaction.sender
+                  )}
+                </td>
+                <td>{transaction.amount}</td>
+                <td>{transaction.currency}</td>
+                <td>
+                  {role === "admin" ? (
+                    <a
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        fetchUserProfile(transaction.recipient);
+                      }}
+                    >
+                      {transaction.recipient}
+                    </a>
+                  ) : (
+                    transaction.recipient
+                  )}
+                </td>
+                <td>{transaction.provider}</td>
+                <td>{transaction.code}</td>
                 <td>{transaction.status}</td>
                 {role === "admin" && (
                   <td>
@@ -171,6 +240,23 @@ export default function TransactionList() {
             ))}
           </tbody>
         </table>
+      )}
+
+      {userProfile && (
+        <div className="alert alert-warning mt-4">
+          <h5>User Profile</h5>
+          <p><strong>Name:</strong> {userProfile.name}</p>
+          <p><strong>Username:</strong> {userProfile.userName}</p>
+          <p><strong>ID Number:</strong> {userProfile.idNumber}</p>
+          <p><strong>Account Number:</strong> {userProfile.accountNumber}</p>
+          <p><strong>Role:</strong> {userProfile.role}</p>
+        </div>
+      )}
+
+      {profileError && (
+        <div className="alert alert-danger mt-4">
+          {profileError}
+        </div>
       )}
     </div>
   );

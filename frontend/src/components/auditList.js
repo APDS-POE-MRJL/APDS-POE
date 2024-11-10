@@ -2,50 +2,84 @@ import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 export default function AuditList() {
-  const [requests, setRequests] = useState([]); // State to hold the requests
-  const [loading, setLoading] = useState(true);  // Loading state
-  const [error, setError] = useState(null);      // Error state
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
+  const [profileError, setProfileError] = useState(null);
+  const [role, setRole] = useState(null);
 
   useEffect(() => {
-    // Function to fetch audit requests
-    const fetchAuditRequests = async () => {
+    const fetchTransactions = async () => {
       try {
-        const token = localStorage.getItem("JWT"); // Get the JWT token from localStorage
+        const token = localStorage.getItem("JWT");
 
         if (!token) {
           throw new Error("No token found, please log in.");
         }
 
+        const decodedToken = JSON.parse(atob(token.split(".")[1]));
+        setRole(decodedToken.role);
+
         const response = await fetch(`${process.env.REACT_APP_API_URL}/requests/auditlist`, {
           method: "GET",
           headers: {
-            "Authorization": `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         });
 
         if (!response.ok) {
-          throw new Error("Failed to fetch audit requests");
+          throw new Error("Failed to fetch transactions");
         }
 
-        const data = await response.json();  // Parse the response as JSON
-        setRequests(data);  // Set the fetched data into state
-        setLoading(false);  // Set loading to false once the data is fetched
+        const data = await response.json();
+        setTransactions(data);
+        setLoading(false);
       } catch (err) {
-        setError(err.message);  // Set the error message if something went wrong
-        setLoading(false);  // Set loading to false in case of an error
+        setError(err.message);
+        setLoading(false);
       }
     };
 
-    fetchAuditRequests();  // Call the function to fetch data on component mount
+    fetchTransactions();
   }, []);
 
-  // If still loading, display a loading message
+  // Function to fetch a user's profile
+  const fetchUserProfile = async (accountNumber) => {
+    try {
+      const token = localStorage.getItem("JWT");
+
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/user/locate?accountNumber=${accountNumber}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        setProfileError("User profile not found");
+        setUserProfile(null);
+        return;
+      }
+
+      const profileData = await response.json();
+      setUserProfile(profileData);
+      setProfileError(null);
+    } catch (err) {
+      setProfileError("An error occurred while fetching the profile.");
+      setUserProfile(null);
+    }
+  };
+
   if (loading) {
     return <div className="text-center">Loading...</div>;
   }
 
-  // If there's an error, display the error message
   if (error) {
     return <div className="text-center text-danger">{error}</div>;
   }
@@ -59,31 +93,82 @@ export default function AuditList() {
         borderRadius: "8px",
       }}
     >
-      <h2 className="text-center mb-4">Audit Log</h2>
+      <h2 className="text-center mb-4">Audit List</h2>
 
-      {requests.length === 0 ? (
-        <div className="text-center">No requests found</div>
+      {transactions.length === 0 ? (
+        <div className="text-center">No audit records found</div>
       ) : (
         <table className="table table-bordered">
           <thead>
             <tr>
               <th>Sender</th>
+              <th>Amount</th>
+              <th>Currency</th>
               <th>Recipient</th>
+              <th>Provider</th>
+              <th>Code</th>
               <th>Status</th>
-              
             </tr>
           </thead>
           <tbody>
-            {requests.map((request) => (
-              <tr key={request._id}>
-                <td>{request.sender}</td>
-                <td>{request.recipient}</td>
-                <td>{request.status}</td>
-
+            {transactions.map((transaction) => (
+              <tr key={transaction._id}>
+                <td>
+                  {role === "admin" ? (
+                    <a
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        fetchUserProfile(transaction.sender);
+                      }}
+                    >
+                      {transaction.sender}
+                    </a>
+                  ) : (
+                    transaction.sender
+                  )}
+                </td>
+                <td>{transaction.amount}</td>
+                <td>{transaction.currency}</td>
+                <td>
+                  {role === "admin" ? (
+                    <a
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        fetchUserProfile(transaction.recipient);
+                      }}
+                    >
+                      {transaction.recipient}
+                    </a>
+                  ) : (
+                    transaction.recipient
+                  )}
+                </td>
+                <td>{transaction.provider}</td>
+                <td>{transaction.code}</td>
+                <td>{transaction.status}</td>
               </tr>
             ))}
           </tbody>
         </table>
+      )}
+
+      {userProfile && (
+        <div className="alert alert-warning mt-4">
+          <h5>User Profile</h5>
+          <p><strong>Name:</strong> {userProfile.name}</p>
+          <p><strong>Username:</strong> {userProfile.userName}</p>
+          <p><strong>ID Number:</strong> {userProfile.idNumber}</p>
+          <p><strong>Account Number:</strong> {userProfile.accountNumber}</p>
+          <p><strong>Role:</strong> {userProfile.role}</p>
+        </div>
+      )}
+
+      {profileError && (
+        <div className="alert alert-danger mt-4">
+          {profileError}
+        </div>
       )}
     </div>
   );
