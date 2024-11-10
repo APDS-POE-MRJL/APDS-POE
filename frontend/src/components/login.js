@@ -72,7 +72,7 @@ export default function Login() {
         <h2 className="text-center mb-4" style={{ color: "#FFFFFF" }}>Login</h2>
         <form onSubmit={onSubmit}>
           <div className="form-group mb-3">
-            <label htmlFor="userName" style={{ color: "#34495e" }}>Username</label>
+            <label htmlFor="userName" style={{ color: "#FFFFFF" }}>Username</label>
             <input
               type="text"
               className="form-control"
@@ -84,7 +84,7 @@ export default function Login() {
             />
           </div>
           <div className="form-group mb-3">
-            <label htmlFor="password" style={{ color: "#34495e" }}>Password</label>
+            <label htmlFor="password" style={{ color: "#FFFFFF" }}>Password</label>
             <input
               type="password"
               className="form-control"
@@ -96,7 +96,7 @@ export default function Login() {
             />
           </div>
           <div className="form-group mb-3">
-            <label htmlFor="accountNumber" style={{ color: "#34495e" }}>Account Number</label>
+            <label htmlFor="accountNumber" style={{ color: "#FFFFFF" }}>Account Number</label>
             <input
               type="text"
               className="form-control"

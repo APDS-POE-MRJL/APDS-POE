@@ -121,7 +121,7 @@ export default function Register() {
         <h2 className="text-center mb-4" style={{ color: "#FFFFFF" }}>Register</h2>
         <form onSubmit={onSubmit}>
           <div className="form-group mb-3">
-            <label htmlFor="name" style={{ color: "#34495e" }}>Full Name</label>
+            <label htmlFor="name" style={{ color: "#FFFFFF" }}>Full Name</label>
             <input
               type="text"
               className="form-control"
@@ -134,7 +134,7 @@ export default function Register() {
             {errors.name && <small className="text-danger">{errors.name}</small>}
           </div>
           <div className="form-group mb-3">
-            <label htmlFor="password" style={{ color: "#34495e" }}>Password</label>
+            <label htmlFor="password" style={{ color: "#FFFFFF" }}>Password</label>
             <input
               type="password"
               className="form-control"
@@ -147,7 +147,7 @@ export default function Register() {
             {errors.password && <small className="text-danger">{errors.password}</small>}
           </div>
           <div className="form-group mb-3">
-            <label htmlFor="idNumber" style={{ color: "#34495e" }}>ID Number</label>
+            <label htmlFor="idNumber" style={{ color: "#FFFFFF" }}>ID Number</label>
             <input
               type="text"
               className="form-control"
