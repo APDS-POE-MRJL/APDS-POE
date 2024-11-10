@@ -113,7 +113,8 @@ export default function Login() {
               className="btn btn-warning"
               style={{
                 backgroundColor: "#f1c40f",
-                color: "#34495e"
+                color: "#34495e",
+                fontWeight: "bold"
               }}
             >
               Login

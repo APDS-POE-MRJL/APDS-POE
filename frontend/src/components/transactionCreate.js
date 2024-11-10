@@ -18,67 +18,102 @@ export default function TransactionCreate() {
 
   const navigate = useNavigate();
 
+  // Regex patterns for validation
   const swiftCodeRegex = /^\d{8}$/;
-  const amountRegex = /^[1-9]\d{0,6}$/;
-  const currencyRegex = /^[A-Z]{3}$/;
+  const amountRegex = /^[1-9]\d{0,6}$/; // up to 1,000,000 (excluding 0)
+  const currencyRegex = /^[A-Z]{3}$/; // 3 uppercase letters
 
   function updateForm(value) {
     const newForm = { ...form, ...value };
+
     // Validation logic
+    console.log("Updating form with value:", value);
+
     if (value.amount !== undefined) {
+      if (!amountRegex.test(value.amount)) {
         setErrors((prevErrors) => ({
-            ...prevErrors,
-            amount: !amountRegex.test(value.amount) ? "Amount must be a number between 1 and 1,000,000." : "",
+          ...prevErrors,
+          amount: "Amount must be a number between 1 and 1,000,000.",
         }));
+      } else {
+        setErrors((prevErrors) => ({ ...prevErrors, amount: "" }));
+      }
     }
 
     if (value.currency !== undefined) {
+      if (!currencyRegex.test(value.currency)) {
         setErrors((prevErrors) => ({
-            ...prevErrors,
-            currency: !currencyRegex.test(value.currency) ? "Currency must be a valid ISO code (e.g., ZAR, USD)." : "",
+          ...prevErrors,
+          currency: "Currency must be a valid ISO code (e.g., ZAR, USD).",
         }));
+      } else {
+        setErrors((prevErrors) => ({ ...prevErrors, currency: "" }));
+      }
     }
 
     if (value.accountNumber !== undefined) {
+      if (value.accountNumber.trim().length === 0) {
         setErrors((prevErrors) => ({
-            ...prevErrors,
-            accountNumber: value.accountNumber.trim().length === 0 ? "Recipient account number is required." : "",
+          ...prevErrors,
+          accountNumber: "Recipient account number is required.",
         }));
+      } else {
+        setErrors((prevErrors) => ({ ...prevErrors, accountNumber: "" }));
+      }
     }
 
     if (value.swiftCode !== undefined) {
+      if (!swiftCodeRegex.test(value.swiftCode)) {
         setErrors((prevErrors) => ({
-            ...prevErrors,
-            swiftCode: !swiftCodeRegex.test(value.swiftCode) ? "SWIFT code must be exactly 8 digits." : "",
+          ...prevErrors,
+          swiftCode: "SWIFT code must be exactly 8 digits.",
         }));
+      } else {
+        setErrors((prevErrors) => ({ ...prevErrors, swiftCode: "" }));
+      }
     }
 
     setForm(newForm);
   }
 
+  // Function to check for errors
   function hasErrors() {
     return Object.values(errors).some((error) => error !== "");
   }
- 
+
   async function onSubmit(e) {
     e.preventDefault();
+
+    // Check for errors
     if (hasErrors()) {
-      window.alert("Please correct the errors before submitting.");
+      console.warn("Form submission failed due to validation errors", errors);
+      window.alert(
+        `Please correct the errors before submitting.\nErrors: ${JSON.stringify(
+          errors
+        )}`
+      );
       return;
     }
 
+    // Retrieve the JWT token from localStorage
     const jwt = localStorage.getItem("JWT");
+
     if (!jwt) {
+      console.warn("JWT token not found in localStorage");
       window.alert("You must be logged in to make a transaction.");
       navigate("/login");
       return;
     }
-    
+
+    // Decode JWT to get sender's account number
     const payload = JSON.parse(atob(jwt.split(".")[1]));
+    console.log("Decoded JWT payload:", payload);
+
     const transactionData = {
       amount: form.amount,
       currency: form.currency,
       accountNumber: form.accountNumber,
+      recipient: form.accountNumber,
       code: form.swiftCode,
       senderAccountNumber: payload.accountNumber,
       provider: "SWIFT",
@@ -86,25 +121,33 @@ export default function TransactionCreate() {
     };
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/requests/create`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${jwt}`,
-        },
-        body: JSON.stringify(transactionData),
-      });
-      
+      console.log("Sending transaction data:", transactionData);
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/requests/create`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${jwt}`, // Include the JWT token in the request header for authentication
+          },
+          body: JSON.stringify(transactionData),
+        }
+      );
+
       if (!response.ok) {
         const errorText = await response.text();
+        console.warn("Non-JSON Response: ", errorText);
         window.alert(`Transaction failed. Server Response: ${errorText}`);
         throw new Error("Transaction failed. Please try again.");
       }
 
       const data = await response.json();
+      console.log("Transaction success data:", data);
       window.alert("Transaction submitted successfully!");
-      navigate("/transactionList");
+
+      navigate("/transactionList"); // Navigate to the transaction list page
     } catch (error) {
+      console.error("Error during transaction submission:", error);
       window.alert(`An error occurred: ${error.message}`);
     }
   }
@@ -112,20 +155,16 @@ export default function TransactionCreate() {
   return (
     <div
       className="d-flex justify-content-center align-items-center vh-100"
-      style={{
-        backgroundColor: "#333333",
-        color: "#f1f1f1",
-      }}
+      style={{ backgroundColor: "#333333" }}
     >
-      <div className="card p-4 shadow" style={{
-        width: "400px",
-        backgroundColor: "#34495e",
-        borderRadius: "8px",
-      }}>
-        <h2 className="text-center mb-4" style={{ color: "#FFFFFF" }}>Create Transaction</h2>
+      <div
+        className="card p-4 shadow"
+        style={{ width: "400px", backgroundColor: "#34495e", color: "white" }}
+      >
+        <h2 className="text-center mb-4">Create Transaction</h2>
         <form onSubmit={onSubmit}>
           <div className="form-group mb-3">
-            <label htmlFor="amount" style={{ color: "#FFFFFF" }}>Amount</label>
+            <label htmlFor="amount">Amount</label>
             <input
               type="number"
               className="form-control"
@@ -133,12 +172,11 @@ export default function TransactionCreate() {
               value={form.amount}
               onChange={(e) => updateForm({ amount: e.target.value })}
               placeholder="Enter amount"
-              style={{ backgroundColor: "#f9f9f9" }}
             />
             {errors.amount && <small className="text-danger">{errors.amount}</small>}
           </div>
           <div className="form-group mb-3">
-            <label htmlFor="currency" style={{ color: "#FFFFFF" }}>Currency</label>
+            <label htmlFor="currency">Currency</label>
             <input
               type="text"
               className="form-control"
@@ -146,12 +184,11 @@ export default function TransactionCreate() {
               value={form.currency}
               onChange={(e) => updateForm({ currency: e.target.value })}
               placeholder="Enter currency (e.g. ZAR, USD)"
-              style={{ backgroundColor: "#f9f9f9" }}
             />
             {errors.currency && <small className="text-danger">{errors.currency}</small>}
           </div>
           <div className="form-group mb-3">
-            <label htmlFor="accountNumber" style={{ color: "#FFFFFF" }}>Recipient Account Number</label>
+            <label htmlFor="accountNumber">Recipient Account Number</label>
             <input
               type="text"
               className="form-control"
@@ -159,12 +196,13 @@ export default function TransactionCreate() {
               value={form.accountNumber}
               onChange={(e) => updateForm({ accountNumber: e.target.value })}
               placeholder="Enter recipient's account number"
-              style={{ backgroundColor: "#f9f9f9" }}
             />
-            {errors.accountNumber && <small className="text-danger">{errors.accountNumber}</small>}
+            {errors.accountNumber && (
+              <small className="text-danger">{errors.accountNumber}</small>
+            )}
           </div>
           <div className="form-group mb-3">
-            <label htmlFor="swiftCode" style={{ color: "#FFFFFF" }}>SWIFT Code</label>
+            <label htmlFor="swiftCode">SWIFT Code</label>
             <input
               type="text"
               className="form-control"
@@ -172,18 +210,14 @@ export default function TransactionCreate() {
               value={form.swiftCode}
               onChange={(e) => updateForm({ swiftCode: e.target.value })}
               placeholder="Enter 8-digit SWIFT code"
-              style={{ backgroundColor: "#f9f9f9" }}
             />
             {errors.swiftCode && <small className="text-danger">{errors.swiftCode}</small>}
           </div>
           <div className="d-grid">
             <button
               type="submit"
-              className="btn btn-warning"
-              style={{
-                backgroundColor: "#f1c40f",
-                color: "#34495e",
-              }}
+              className="btn"
+              style={{ backgroundColor: "yellow", color: "#34495e", fontWeight: "bold" }}
               disabled={hasErrors()}
             >
               Send Transaction
