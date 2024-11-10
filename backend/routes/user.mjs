@@ -76,6 +76,8 @@ router.post("/login", bruteforce.prevent, async (req, res) => {
 
         const passwordMatch = await bcrypt.compare(password, user.password);
         const accountMatch = await bcrypt.compare(accountNumber, user.accountNumber);
+        //const accountMatch = user.accountNumber === accountNumber;
+
 
         if (passwordMatch && accountMatch) {
             // Successful login

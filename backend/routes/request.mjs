@@ -11,7 +11,7 @@ var store = new ExpressBrute.MemoryStore();
 var bruteforce = new ExpressBrute(store);
 
 
-//This page will be for both admins and users, users can see their pending requests and admins can see all pending requests
+// This page will be for both admins and users, users can see their pending requests and admins can see all pending requests
 router.get("/list", async (req, res) => {
     try {
         const token = req.headers.authorization.split(" ")[1];
@@ -21,23 +21,26 @@ router.get("/list", async (req, res) => {
         } catch (error) {
             return res.status(401).json({ message: "Invalid token" });
         }
+
         const accountNumber = decodedToken.accountNumber;
         const role = decodedToken.role;
 
+        // If the role is "user", fetch only the user's transactions
         let query = { status: "Pending" };
         if (role === "user") {
-            query.sender = accountNumber;
+            query.sender = accountNumber; // Only show transactions where the user is the sender
         }
 
         let collection = await requestsDb.collection("requests");
         let results = await collection.find(query).toArray();
 
-        res.status(200).json(results);
+        res.status(200).json(results); // Send the filtered list of transactions
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Request failed" });
     }
 });
+
 
 //This page is for both users, users can see all requests and admins can see all requests (like an audit log)
 router.get("/auditlist", async (req, res) => {
@@ -94,7 +97,7 @@ router.post("/create", async (req, res) => {
             console.error("Amount validation failed:", amount);
             return res.status(400).json({ message: "Amount is invalid" });
         }
-        const validCurrencies = ["USD", "EUR", "GBP", "JPY", "CNY", "INR", "ZAR"];
+        const validCurrencies = ["USD", "EUR", "GBP", "JPY", "CNY", "INR", "CAD", "AUD", "SGD", "CHF", "MYR", "THB", "IDR", "SAR", "AED", "ZAR", "HKD", "PHP", "SEK", "NOK", "DKK", "NZD", "KRW", "RUB", "BRL", "TRY", "MXN", "PLN", "TWD", "ILS", "QAR", "CZK", "HUF", "CLP", "EGP", "COP", "ARS", "PHP", "VND", "PKR", "IQD", "KWD", "OMR", "NGN", "KES", "UGX", "GHS", "ZMW", "MAD", "DZD", "TND", "LYD", "JOD", "BHD", "LBP", "SYP", "YER", "SOS", "SDG", "MZN", "AOA"];
         if (!validCurrencies.includes(currency)) {
             console.error("Currency validation failed:", currency);
             return res.status(400).json({ message: "Currency is invalid" });
