@@ -112,7 +112,7 @@ async function onSubmit(e) {
       currency: form.currency,
       accountNumber: form.accountNumber,
       recipient: form.accountNumber,  // Use 'recipient' instead of 'recipiant'
-      swiftCode: form.swiftCode,
+      code: form.swiftCode,
       senderAccountNumber: payload.accountNumber,
       provider: "SWIFT",
       status: "Pending",
@@ -138,7 +138,7 @@ async function onSubmit(e) {
 
       const data = await response.json();
       console.log("Transaction success data:", data);
-      window.alert(`Transaction submitted successfully!\nTransaction ID: ${data.transactionId}`);
+      window.alert("Transaction submitted successfully!");
 
       navigate("/list"); // Navigate to the transaction list page
   } catch (error) {
