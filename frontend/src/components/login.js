@@ -12,7 +12,6 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Check if there is state passed from the Register component
   useEffect(() => {
     if (location.state) {
       const { userName, accountNumber } = location.state;
@@ -44,14 +43,11 @@ export default function Login() {
 
       window.alert("Authentication successful!");
 
-      // Store token and account number in local storage
       localStorage.setItem("JWT", token);
       localStorage.setItem("accountNumber", accountNumber);
 
-      // Reset form
       setForm({ userName: "", password: "", accountNumber: "" });
 
-      // Navigate to the home page and refresh
       navigate("/");
       window.location.reload();
 
@@ -61,12 +57,22 @@ export default function Login() {
   }
 
   return (
-    <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
-      <div className="card p-4 shadow" style={{ width: "300px" }}>
-        <h2 className="text-center mb-4">Login</h2>
+    <div
+      className="d-flex justify-content-center align-items-center vh-100"
+      style={{
+        backgroundColor: "#333333", // Blue-gray background
+        color: "#f1f1f1" // Light text color for contrast
+      }}
+    >
+      <div className="card p-4 shadow" style={{
+        width: "350px",
+        backgroundColor: "#34495e", // Light background on the form card
+        borderRadius: "8px"
+      }}>
+        <h2 className="text-center mb-4" style={{ color: "#FFFFFF" }}>Login</h2>
         <form onSubmit={onSubmit}>
           <div className="form-group mb-3">
-            <label htmlFor="userName">Username</label>
+            <label htmlFor="userName" style={{ color: "#FFFFFF" }}>Username</label>
             <input
               type="text"
               className="form-control"
@@ -74,10 +80,11 @@ export default function Login() {
               value={form.userName}
               onChange={(e) => updateForm({ userName: e.target.value })}
               placeholder="Enter your username"
+              style={{ backgroundColor: "#f9f9f9" }}
             />
           </div>
           <div className="form-group mb-3">
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password" style={{ color: "#FFFFFF" }}>Password</label>
             <input
               type="password"
               className="form-control"
@@ -85,10 +92,11 @@ export default function Login() {
               value={form.password}
               onChange={(e) => updateForm({ password: e.target.value })}
               placeholder="Enter your password"
+              style={{ backgroundColor: "#f9f9f9" }}
             />
           </div>
           <div className="form-group mb-3">
-            <label htmlFor="accountNumber">Account Number</label>
+            <label htmlFor="accountNumber" style={{ color: "#FFFFFF" }}>Account Number</label>
             <input
               type="text"
               className="form-control"
@@ -96,10 +104,18 @@ export default function Login() {
               value={form.accountNumber}
               onChange={(e) => updateForm({ accountNumber: e.target.value })}
               placeholder="Enter your account number"
+              style={{ backgroundColor: "#f9f9f9" }}
             />
           </div>
           <div className="d-grid">
-            <button type="submit" className="btn btn-primary">
+            <button
+              type="submit"
+              className="btn btn-warning"
+              style={{
+                backgroundColor: "#f1c40f",
+                color: "#34495e"
+              }}
+            >
               Login
             </button>
           </div>
