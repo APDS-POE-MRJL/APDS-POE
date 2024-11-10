@@ -16,6 +16,7 @@ to access the webstie, you will do 'cd frontend' followed by 'npm start' to boot
 
 Once the website is active, you can then register or login with a new user account, which will then have the capabilities to submit new transaction requests to the API which will store the information, 
 Administrators are also able to sign in using the same login terminal, however they are are then able to view your transaction details and either accept or reject transaction requests sent by users
+Note: Administrator acocunts have been created differently from the user accounts, Admin Accounts cannot be created, you can only log in with Admin Accounts
 
 # Accounts
 
