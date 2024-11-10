@@ -106,10 +106,6 @@ export default function Register() {
         type: "success"
       });
 
-      setTimeout(() => {
-        navigate("/login", { state: { userName: data.userName, accountNumber: data.accountNumber } });
-      }, 2000); // Delay navigation for notification visibility
-
     } catch (error) {
       setNotification({
         message: error.message,
@@ -117,6 +113,12 @@ export default function Register() {
       });
     }
   }
+
+  const handleNotificationClose = () => {
+    setNotification(null);
+    // Navigate to login page when notification is closed
+    navigate("/login", { state: { userName: form.userName, accountNumber: form.accountNumber } });
+  };
 
   return (
     <div
@@ -193,7 +195,7 @@ export default function Register() {
         <Notification
           message={notification.message}
           type={notification.type}
-          onClose={() => setNotification(null)}
+          onClose={handleNotificationClose} // Close notification on click
         />
       )}
     </div>
