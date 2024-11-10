@@ -1,39 +1,37 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
+import Notification from "./Notification"; // Import the Notification component
 
 export default function TransactionCreate() {
   const [form, setForm] = useState({
     amount: "",
     currency: "",
     accountNumber: "",
-    swiftCode: "",
+    swiftCode: ""
   });
   const [errors, setErrors] = useState({
     amount: "",
     currency: "",
     accountNumber: "",
-    swiftCode: "",
+    swiftCode: ""
   });
+  const [notification, setNotification] = useState(null); // Notification state
 
   const navigate = useNavigate();
 
-  // Regex patterns for validation
   const swiftCodeRegex = /^\d{8}$/;
-  const amountRegex = /^[1-9]\d{0,6}$/; // up to 1,000,000 (excluding 0)
-  const currencyRegex = /^[A-Z]{3}$/; // 3 uppercase letters
+  const amountRegex = /^[1-9]\d{0,6}$/;
+  const currencyRegex = /^[A-Z]{3}$/;
 
   function updateForm(value) {
     const newForm = { ...form, ...value };
-
-    // Validation logic
-    console.log("Updating form with value:", value);
 
     if (value.amount !== undefined) {
       if (!amountRegex.test(value.amount)) {
         setErrors((prevErrors) => ({
           ...prevErrors,
-          amount: "Amount must be a number between 1 and 1,000,000.",
+          amount: "Amount must be a number between 1 and 1,000,000."
         }));
       } else {
         setErrors((prevErrors) => ({ ...prevErrors, amount: "" }));
@@ -44,7 +42,7 @@ export default function TransactionCreate() {
       if (!currencyRegex.test(value.currency)) {
         setErrors((prevErrors) => ({
           ...prevErrors,
-          currency: "Currency must be a valid ISO code (e.g., ZAR, USD).",
+          currency: "Currency must be a valid ISO code (e.g., ZAR, USD)."
         }));
       } else {
         setErrors((prevErrors) => ({ ...prevErrors, currency: "" }));
@@ -55,7 +53,7 @@ export default function TransactionCreate() {
       if (value.accountNumber.trim().length === 0) {
         setErrors((prevErrors) => ({
           ...prevErrors,
-          accountNumber: "Recipient account number is required.",
+          accountNumber: "Recipient account number is required."
         }));
       } else {
         setErrors((prevErrors) => ({ ...prevErrors, accountNumber: "" }));
@@ -66,7 +64,7 @@ export default function TransactionCreate() {
       if (!swiftCodeRegex.test(value.swiftCode)) {
         setErrors((prevErrors) => ({
           ...prevErrors,
-          swiftCode: "SWIFT code must be exactly 8 digits.",
+          swiftCode: "SWIFT code must be exactly 8 digits."
         }));
       } else {
         setErrors((prevErrors) => ({ ...prevErrors, swiftCode: "" }));
@@ -76,7 +74,6 @@ export default function TransactionCreate() {
     setForm(newForm);
   }
 
-  // Function to check for errors
   function hasErrors() {
     return Object.values(errors).some((error) => error !== "");
   }
@@ -84,30 +81,26 @@ export default function TransactionCreate() {
   async function onSubmit(e) {
     e.preventDefault();
 
-    // Check for errors
     if (hasErrors()) {
-      console.warn("Form submission failed due to validation errors", errors);
-      window.alert(
-        `Please correct the errors before submitting.\nErrors: ${JSON.stringify(
-          errors
-        )}`
-      );
+      setNotification({
+        message: `Please correct the errors before submitting.`,
+        type: "warning"
+      });
       return;
     }
 
-    // Retrieve the JWT token from localStorage
     const jwt = localStorage.getItem("JWT");
 
     if (!jwt) {
-      console.warn("JWT token not found in localStorage");
-      window.alert("You must be logged in to make a transaction.");
+      setNotification({
+        message: "You must be logged in to make a transaction.",
+        type: "danger"
+      });
       navigate("/login");
       return;
     }
 
-    // Decode JWT to get sender's account number
     const payload = JSON.parse(atob(jwt.split(".")[1]));
-    console.log("Decoded JWT payload:", payload);
 
     const transactionData = {
       amount: form.amount,
@@ -117,38 +110,45 @@ export default function TransactionCreate() {
       code: form.swiftCode,
       senderAccountNumber: payload.accountNumber,
       provider: "SWIFT",
-      status: "Pending",
+      status: "Pending"
     };
 
     try {
-      console.log("Sending transaction data:", transactionData);
       const response = await fetch(
         `${process.env.REACT_APP_API_URL}/requests/create`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${jwt}`, // Include the JWT token in the request header for authentication
+            Authorization: `Bearer ${jwt}`
           },
-          body: JSON.stringify(transactionData),
+          body: JSON.stringify(transactionData)
         }
       );
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.warn("Non-JSON Response: ", errorText);
-        window.alert(`Transaction failed. Server Response: ${errorText}`);
+        setNotification({
+          message: `Transaction failed. Server Response: ${errorText}`,
+          type: "danger"
+        });
         throw new Error("Transaction failed. Please try again.");
       }
 
       const data = await response.json();
-      console.log("Transaction success data:", data);
-      window.alert("Transaction submitted successfully!");
+      setNotification({
+        message: "Transaction submitted successfully!",
+        type: "success"
+      });
 
-      navigate("/transactionList"); // Navigate to the transaction list page
+      setTimeout(() => {
+        navigate("/transactionList");
+      }, 3000);
     } catch (error) {
-      console.error("Error during transaction submission:", error);
-      window.alert(`An error occurred: ${error.message}`);
+      setNotification({
+        message: `An error occurred: ${error.message}`,
+        type: "danger"
+      });
     }
   }
 
@@ -162,6 +162,13 @@ export default function TransactionCreate() {
         style={{ width: "400px", backgroundColor: "#34495e", color: "white" }}
       >
         <h2 className="text-center mb-4">Create Transaction</h2>
+        {notification && (
+          <Notification
+            message={notification.message}
+            type={notification.type}
+            onClose={() => setNotification(null)}
+          />
+        )}
         <form onSubmit={onSubmit}>
           <div className="form-group mb-3">
             <label htmlFor="amount">Amount</label>

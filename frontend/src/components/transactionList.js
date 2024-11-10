@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
+import Notification from "./Notification"; // Import Notification component
 
 export default function TransactionList() {
   const [transactions, setTransactions] = useState([]);
@@ -8,6 +9,7 @@ export default function TransactionList() {
   const [role, setRole] = useState(null); // Store the user's role
   const [userProfile, setUserProfile] = useState(null); // For viewing user profile details
   const [profileError, setProfileError] = useState(null);
+  const [notification, setNotification] = useState(null); // Add notification state
 
   useEffect(() => {
     // Function to fetch transactions
@@ -106,8 +108,19 @@ export default function TransactionList() {
             : transaction
         )
       );
+
+      // Set notification for approval
+      setNotification({
+        message: "Transaction approved successfully!",
+        type: "success",
+      });
     } catch (err) {
       setError(err.message);
+      // Set notification for error
+      setNotification({
+        message: `Error: ${err.message}`,
+        type: "danger",
+      });
     }
   };
 
@@ -137,8 +150,19 @@ export default function TransactionList() {
             : transaction
         )
       );
+
+      // Set notification for rejection
+      setNotification({
+        message: "Transaction rejected.",
+        type: "danger",
+      });
     } catch (err) {
       setError(err.message);
+      // Set notification for error
+      setNotification({
+        message: `Error: ${err.message}`,
+        type: "danger",
+      });
     }
   };
 
@@ -153,24 +177,24 @@ export default function TransactionList() {
   }
 
   return (
-    
-    
-    
     <div
       className="container mt-4"
       style={{
         backgroundColor: "#34495e",
         padding: "20px",
         borderRadius: "8px",
-        color: "#f1f1f1"
+        color: "#f1f1f1",
       }}
     >
       <h2 className="text-center mb-4" style={{ color: "#f1f1f1" }}>Requests</h2>
-  
+
       {transactions.length === 0 ? (
         <div className="text-center">No requests</div>
       ) : (
-        <table className="table table-bordered" style={{ backgroundColor: "#333333", color: "#f1f1f1" }}>
+        <table
+          className="table table-bordered"
+          style={{ backgroundColor: "#333333", color: "#f1f1f1" }}
+        >
           <thead style={{ color: "#f1c40f" }}>
             <tr>
               <th>Sender</th>
@@ -193,7 +217,7 @@ export default function TransactionList() {
                       onClick={(e) => {
                         e.preventDefault();
                         fetchUserProfile(transaction.sender);
-                      }}                      
+                      }}
                     >
                       {transaction.sender}
                     </a>
@@ -210,7 +234,7 @@ export default function TransactionList() {
                       onClick={(e) => {
                         e.preventDefault();
                         fetchUserProfile(transaction.recipient);
-                      }}              
+                      }}
                     >
                       {transaction.recipient}
                     </a>
@@ -230,7 +254,7 @@ export default function TransactionList() {
                           style={{
                             backgroundColor: "#28a745",
                             color: "#ffffff",
-                            marginRight: "5px"
+                            marginRight: "5px",
                           }}
                           onClick={() => approveTransaction(transaction._id)}
                         >
@@ -240,7 +264,7 @@ export default function TransactionList() {
                           className="btn"
                           style={{
                             backgroundColor: "#dc3545",
-                            color: "#ffffff"
+                            color: "#ffffff",
                           }}
                           onClick={() => rejectTransaction(transaction._id)}
                         >
@@ -255,7 +279,7 @@ export default function TransactionList() {
           </tbody>
         </table>
       )}
-  
+
       {userProfile && (
         <div className="alert alert-warning mt-4">
           <h5>User Profile</h5>
@@ -266,13 +290,20 @@ export default function TransactionList() {
           <p><strong>Role:</strong> {userProfile.role}</p>
         </div>
       )}
-  
+
       {profileError && (
         <div className="alert alert-danger mt-4">
           {profileError}
         </div>
       )}
+
+      {/* Notification component */}
+      {notification && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+        />
+      )}
     </div>
   );
-  
 }
