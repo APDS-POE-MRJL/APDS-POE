@@ -21,109 +21,135 @@ export default function TransactionCreate() {
   // Regex patterns for validation
   const swiftCodeRegex = /^\d{8}$/;
   const amountRegex = /^[1-9]\d{0,6}$/; // up to 1,000,000 (excluding 0)
+  const currencyRegex = /^[A-Z]{3}$/; // 3 uppercase letters
 
   function updateForm(value) {
     const newForm = { ...form, ...value };
 
     // Validation logic
-    if (value.amount !== undefined && (value.amount <= 0 || value.amount > 1000000)) {
-      setErrors(prevErrors => ({
-        ...prevErrors,
-        amount: "Amount must be between 1 and 1,000,000.",
-      }));
-    } else {
-      setErrors(prevErrors => ({ ...prevErrors, amount: "" }));
+    console.log("Updating form with value:", value); // Log the updated form values
+
+    if (value.amount !== undefined) {
+        if (!amountRegex.test(value.amount)) {
+            setErrors(prevErrors => ({
+                ...prevErrors,
+                amount: "Amount must be a number between 1 and 1,000,000.",
+            }));
+        } else {
+            setErrors(prevErrors => ({ ...prevErrors, amount: "" }));
+        }
     }
 
-    if (value.currency !== undefined && value.currency.trim().length === 0) {
-      setErrors(prevErrors => ({
-        ...prevErrors,
-        currency: "Currency is required.",
-      }));
-    } else {
-      setErrors(prevErrors => ({ ...prevErrors, currency: "" }));
+    if (value.currency !== undefined) {
+        if (!currencyRegex.test(value.currency)) {
+            setErrors(prevErrors => ({
+                ...prevErrors,
+                currency: "Currency must be a valid ISO code (e.g., ZAR, USD).",
+            }));
+        } else {
+            setErrors(prevErrors => ({ ...prevErrors, currency: "" }));
+        }
     }
 
-    if (value.accountNumber !== undefined && value.accountNumber.trim().length === 0) {
-      setErrors(prevErrors => ({
-        ...prevErrors,
-        accountNumber: "Recipient account number is required.",
-      }));
-    } else {
-      setErrors(prevErrors => ({ ...prevErrors, accountNumber: "" }));
+    if (value.accountNumber !== undefined) {
+        if (value.accountNumber.trim().length === 0) {
+            setErrors(prevErrors => ({
+                ...prevErrors,
+                accountNumber: "Recipient account number is required.",
+            }));
+        } else {
+            setErrors(prevErrors => ({ ...prevErrors, accountNumber: "" }));
+        }
     }
 
-    if (value.swiftCode !== undefined && !swiftCodeRegex.test(value.swiftCode)) {
-      setErrors(prevErrors => ({
-        ...prevErrors,
-        swiftCode: "SWIFT code must be exactly 8 digits.",
-      }));
-    } else {
-      setErrors(prevErrors => ({ ...prevErrors, swiftCode: "" }));
+    if (value.swiftCode !== undefined) {
+        if (!swiftCodeRegex.test(value.swiftCode)) {
+            setErrors(prevErrors => ({
+                ...prevErrors,
+                swiftCode: "SWIFT code must be exactly 8 digits.",
+            }));
+        } else {
+            setErrors(prevErrors => ({ ...prevErrors, swiftCode: "" }));
+        }
     }
 
     setForm(newForm);
-  }
+}
 
-  function hasErrors() {
-    return (
-      errors.amount ||
-      errors.currency ||
-      errors.accountNumber ||
-      errors.swiftCode ||
-      !form.amount ||
-      !form.currency ||
-      !form.accountNumber ||
-      !form.swiftCode
-    );
-  }
 
-  async function onSubmit(e) {
-    e.preventDefault();
+// Add this function to check for errors
+function hasErrors() {
+  return Object.values(errors).some(error => error !== ""); // Check if any error is present
+}
 
-    if (hasErrors()) {
-      window.alert("Please correct the errors before submitting.");
+async function onSubmit(e) {
+  e.preventDefault();
+
+  // Check for errors
+  if (hasErrors()) {
+      console.warn("Form submission failed due to validation errors", errors);
+      window.alert(`Please correct the errors before submitting. 
+      Errors: ${JSON.stringify(errors)}`);
       return;
-    }
+  }
 
-    const jwt = localStorage.getItem("JWT");
-    const payload = JSON.parse(atob(jwt.split(".")[1])); // Decode JWT to get sender's account number
+  // Retrieve the JWT token from localStorage
+  const jwt = localStorage.getItem("JWT");
 
-    const transactionData = {
+  if (!jwt) {
+      console.warn("JWT token not found in localStorage");
+      window.alert("You must be logged in to make a transaction.");
+      navigate("/login");
+      return;
+  }
+
+  // Decode JWT to get sender's account number
+  const payload = JSON.parse(atob(jwt.split(".")[1])); // Decode JWT to get sender's account number
+  console.log("Decoded JWT payload:", payload);  // Log the decoded JWT payload
+
+  const transactionData = {
       amount: form.amount,
       currency: form.currency,
       accountNumber: form.accountNumber,
+      recipient: form.accountNumber,  // Use 'recipient' instead of 'recipiant'
       swiftCode: form.swiftCode,
-      senderAccountNumber: payload.accountNumber, // Sender's account number from JWT
+      senderAccountNumber: payload.accountNumber,
       provider: "SWIFT",
-      status: "Pending", // Default status
-    };
+      status: "Pending",
+  };
 
-    try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/request/create`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${jwt}`, // Include the JWT token in the request
-        },
-        body: JSON.stringify(transactionData),
+  try {
+      console.log("Sending transaction data:", transactionData);
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/requests/create`, {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${jwt}`, // Include the JWT token in the request header for authentication
+          },
+          body: JSON.stringify(transactionData),
       });
 
       if (!response.ok) {
-        throw new Error("Transaction failed. Please try again.");
+          const errorText = await response.text();
+          console.warn("Non-JSON Response: ", errorText);  // Log the response body for debugging
+          window.alert(`Transaction failed. Server Response: ${errorText}`);
+          throw new Error("Transaction failed. Please try again.");
       }
 
       const data = await response.json();
-
-      // Display the success message
+      console.log("Transaction success data:", data);
       window.alert(`Transaction submitted successfully!\nTransaction ID: ${data.transactionId}`);
 
-      // Redirect to the transaction list or another page if necessary
       navigate("/list"); // Navigate to the transaction list page
-    } catch (error) {
-      window.alert(error.message);
-    }
+  } catch (error) {
+      console.error("Error during transaction submission:", error);
+      window.alert(`An error occurred: ${error.message}`);
   }
+}
+
+
+
+
 
   return (
     <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
