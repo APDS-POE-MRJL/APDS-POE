@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
+import Notification from "./Notification";
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -13,6 +14,7 @@ export default function Register() {
     password: "",
     idNumber: ""
   });
+  const [notification, setNotification] = useState(null); // Notification state
 
   const navigate = useNavigate();
 
@@ -68,7 +70,10 @@ export default function Register() {
     e.preventDefault();
 
     if (hasErrors()) {
-      window.alert("Please correct the errors before submitting.");
+      setNotification({
+        message: "Please correct the errors before submitting.",
+        type: "danger"
+      });
       return;
     }
 
@@ -96,12 +101,20 @@ export default function Register() {
 
       const data = await response.json();
 
-      window.alert(`Registration successful!\nYour username: ${data.userName}\nYour account number: ${data.accountNumber}`);
+      setNotification({
+        message: `Registration successful! Username: ${data.userName}, Account number: ${data.accountNumber}`,
+        type: "success"
+      });
 
-      navigate("/login", { state: { userName: data.userName, accountNumber: data.accountNumber } });
-      
+      setTimeout(() => {
+        navigate("/login", { state: { userName: data.userName, accountNumber: data.accountNumber } });
+      }, 2000); // Delay navigation for notification visibility
+
     } catch (error) {
-      window.alert(error.message);
+      setNotification({
+        message: error.message,
+        type: "danger"
+      });
     }
   }
 
@@ -167,7 +180,6 @@ export default function Register() {
                 backgroundColor: "#f1c40f",
                 color: "#34495e",
                 fontWeight: "bold"
-                
               }}
             >
               Register
@@ -175,6 +187,15 @@ export default function Register() {
           </div>
         </form>
       </div>
+
+      {/* Notification component */}
+      {notification && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
+        />
+      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom"; 
+import { useNavigate, useLocation } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
+import Notification from "./Notification";
 
 export default function Login() {
   const [form, setForm] = useState({
@@ -9,13 +10,17 @@ export default function Login() {
     accountNumber: ""
   });
 
+  const [notification, setNotification] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
     if (location.state) {
       const { userName, accountNumber } = location.state;
-      window.alert(`Registration Successful!\nYour username: ${userName}\nYour account number: ${accountNumber}`);
+      setNotification({
+        message: `Registration Successful! Your username: ${userName}, Account number: ${accountNumber}`,
+        type: "success"
+      });
     }
   }, [location.state]);
 
@@ -34,25 +39,36 @@ export default function Login() {
       });
 
       if (!response.ok) {
-        window.alert("Invalid credentials, please try again!");
+        setNotification({
+          message: "Invalid credentials, please try again!",
+          type: "danger"
+        });
         return;
       }
 
       const data = await response.json();
       const { token, accountNumber } = data;
 
-      window.alert("Authentication successful!");
+      setNotification({
+        message: "Login successful!",
+        type: "success"
+      });
 
       localStorage.setItem("JWT", token);
       localStorage.setItem("accountNumber", accountNumber);
 
       setForm({ userName: "", password: "", accountNumber: "" });
 
-      navigate("/");
-      window.location.reload();
+      setTimeout(() => {
+        navigate("/");
+        window.location.reload();
+      }, 2000); // Delay navigation to let the user see the notification
 
     } catch (error) {
-      window.alert("Login failed: " + error.message);
+      setNotification({
+        message: "Login failed: " + error.message,
+        type: "danger"
+      });
     }
   }
 
@@ -60,13 +76,13 @@ export default function Login() {
     <div
       className="d-flex justify-content-center align-items-center vh-100"
       style={{
-        backgroundColor: "#333333", // Blue-gray background
-        color: "#f1f1f1" // Light text color for contrast
+        backgroundColor: "#333333",
+        color: "#f1f1f1"
       }}
     >
       <div className="card p-4 shadow" style={{
         width: "350px",
-        backgroundColor: "#34495e", // Light background on the form card
+        backgroundColor: "#34495e",
         borderRadius: "8px"
       }}>
         <h2 className="text-center mb-4" style={{ color: "#FFFFFF" }}>Login</h2>
@@ -122,6 +138,15 @@ export default function Login() {
           </div>
         </form>
       </div>
+
+      {/* Notification component */}
+      {notification && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
+        />
+      )}
     </div>
   );
 }
